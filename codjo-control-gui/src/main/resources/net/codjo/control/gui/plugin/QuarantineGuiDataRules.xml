@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<digester-rules>
+    <pattern value="quarantines">
+        <object-create-rule classname="net.codjo.control.gui.data.QuarantineGuiDataList"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="requestTopic"/>
+    </pattern>
+
+    <pattern value="quarantines/gui">
+        <object-create-rule classname="net.codjo.control.gui.data.QuarantineGuiData"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="name"/>
+        <bean-property-setter-rule pattern="tooltip"/>
+        <bean-property-setter-rule pattern="quarantine"/>
+        <bean-property-setter-rule pattern="quser"/>
+        <bean-property-setter-rule pattern="icon"/>
+        <set-next-rule methodname="addData"/>
+    </pattern>
+
+    <pattern value="quarantines/gui/window">
+        <object-create-rule classname="net.codjo.control.gui.data.WindowData"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="title"/>
+        <bean-property-setter-rule pattern="preference"/>
+        <bean-property-setter-rule pattern="windowWidth"/>
+        <bean-property-setter-rule pattern="windowHeight"/>
+        <bean-property-setter-rule pattern="syncValidation"/>
+        <call-method-rule pattern="filter" methodname="addFilter" paramcount="0"/>
+        <call-method-rule pattern="forceAction" methodname="setForceAction" paramcount="0"/>
+        <call-method-rule pattern="validationAction" methodname="setValidationAction" paramcount="0"/>
+        <call-method-rule pattern="exportAction" methodname="setExportAction" paramcount="0"/>
+        <call-method-rule pattern="toolbarCustomizer" methodname="setToolbarCustomizer" paramcount="0"/>
+        <set-next-rule methodname="setWindow"/>
+    </pattern>
+
+    <pattern value="quarantines/gui/window/dbFilter">
+        <object-create-rule classname="net.codjo.control.gui.data.DbFilterData"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="renderer"/>
+        <call-method-rule methodname="setDbFilterColumnName" paramcount="1"/>
+        <call-param-rule paramnumber="0" type="java.lang.String"/>
+        <set-next-rule methodname="addDbFilter"/>
+    </pattern>
+
+    <pattern value="quarantines/gui/detail">
+        <object-create-rule classname="net.codjo.control.gui.data.DetailData"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="title"/>
+        <bean-property-setter-rule pattern="nbFieldsByPage"/>
+        <bean-property-setter-rule pattern="windowWidth"/>
+        <bean-property-setter-rule pattern="windowHeight"/>
+        <call-method-rule pattern="field" methodname="addField" paramcount="0"/>
+        <set-next-rule methodname="setDetail"/>
+    </pattern>
+
+    <pattern value="quarantines/gui/detail/tab">
+        <object-create-rule classname="net.codjo.control.gui.data.TabData"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="title"/>
+        <call-method-rule pattern="field" methodname="addField" paramcount="0"/>
+        <set-next-rule methodname="addTab"/>
+    </pattern>
+
+</digester-rules>
+
+

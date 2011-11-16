@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<entities>
+    <structure>
+        <table type="quarantine" label="Table de quarantaine émetteur" name="issuer"
+               sql="Q_AP_ISSUER">
+            <field label="Code emetteur" name="issuerCode" sql="ISSUER_CODE"
+                   sql-type="VARCHAR"/>
+            <field label="Libellé emetteur" name="issuerName" sql="ISSUER_NAME"
+                   sql-type="VARCHAR"/>
+            <field label="date" name="date" sql="ISSUER_DATE" sql-type="VARCHAR"/>
+            <field label="user" name="user" sql="ISSUER_USER" sql-type="VARCHAR"/>
+            <field label="source" name="source" sql="ISSUER_SRC" sql-type="VARCHAR"/>
+        </table>
+        <table type="quarantine" label="Table de quarantaine benchmark" name="benchmark"
+               sql="Q_AP_BENCHMARK">
+            <field label="Code ptf" name="portfolioCode" sql="PORTFOLIO_CODE"
+                   sql-type="VARCHAR"/>
+            <field label="Code bench" name="benchCode" sql="BENCH_CODE"
+                   sql-type="VARCHAR"/>
+        </table>
+        <table type="quarantine" label="Table de quarantaine coupon" name="dividend"
+               sql="Q_AP_DIVIDEND">
+        </table>
+    </structure>
+</entities>

@@ -1,0 +1,137 @@
+  <step id="Upper_ReferenceIssuerCode" priority="20" type="updater">
+    <description>Mise-&#224;-jours du champ REFERENCE_ISSUER_CODE en lettres capitales.</description>
+    <test>NONE</test>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    $control.table$.REFERENCE_ISSUER_CODE = upper($control.table$.REFERENCE_ISSUER_CODE)
+              from   $control.table$
+              where  $control.table$.$line.ok$
+              and    $control.table$.REFERENCE_ISSUER_CODE is not null
+            ]]>
+    </query>
+  </step>
+  <step error_code="15" id="IsReferenced_IssuerCountry" priority="25" type="control">
+    <description>Mise en erreur des lignes dont le code Pays du champ ISSUER_COUNTRY n&apos;est pas null et n&apos;est pas r&#233;f&#233;renc&#233; dans la table REF_COUNTRY.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">Le 'pays' n&apos;est pas r&#233;f&#233;renc&#233; dans le r&#233;f&#233;rentiel pays.</parameter>
+    <query>
+      <![CDATA[
+              update    $control.table$
+              set       $control.table$.ERROR_TYPE = ?,
+                        $control.table$.ERROR_LOG = ?
+              from      $control.table$
+              left join REF_COUNTRY
+              on        $control.table$.ISSUER_COUNTRY = REF_COUNTRY.CODE
+              where     $control.table$.$line.ok$
+              and       $control.table$.ISSUER_COUNTRY is not null
+              and       REF_COUNTRY.CODE is null
+            ]]>
+    </query>
+  </step>
+  <step error_code="15" id="IsReferenced_ReferenceIssuerCountry" priority="30" type="control">
+    <description>Mise en erreur des lignes dont le code Pays du champ REFERENCE_ISSUER_COUNTRY n&apos;est pas null et n&apos;est pas r&#233;f&#233;renc&#233; dans la table REF_COUNTRY.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">Le 'pays de r&#233;f&#233;rence' n&apos;est pas r&#233;f&#233;renc&#233; dans le r&#233;f&#233;rentiel pays.</parameter>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set       $control.table$.ERROR_TYPE = ?,
+                        $control.table$.ERROR_LOG = ?
+              from      $control.table$
+              left join REF_COUNTRY
+              on        $control.table$.REFERENCE_ISSUER_COUNTRY = REF_COUNTRY.CODE
+              where     $control.table$.$line.ok$
+              and       $control.table$.REFERENCE_ISSUER_COUNTRY is not null
+              and       REF_COUNTRY.CODE is null
+            ]]>
+    </query>
+  </step>
+  <step error_code="15" id="IsReferenced_IssuerCurrencyCode" priority="35" type="control">
+    <description>Mise en erreur des lignes dont le code Devise du champ ISSUER_CURRENCY_CODE n&apos;est pas null et n&apos;est pas r&#233;f&#233;renc&#233;               dans la table REF_CURRENCY.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">La 'devise &#233;metteur' n&apos;est pas r&#233;f&#233;renc&#233; dans le r&#233;f&#233;rentiel devises.</parameter>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set       $control.table$.ERROR_TYPE = ?,
+                        $control.table$.ERROR_LOG = ?
+              from      $control.table$
+              left join REF_CURRENCY
+              on        $control.table$.ISSUER_CURRENCY_CODE = REF_CURRENCY.CODE
+              where     $control.table$.$line.ok$
+              and       $control.table$.ISSUER_CURRENCY_CODE is not null
+              and       REF_CURRENCY.CODE is null
+            ]]>
+    </query>
+  </step>
+  <step error_code="10" id="IsNull_IssuerType" priority="40" type="control">
+    <description>Mise en erreur des lignes dont le Type Emetteur n&apos;est pas renseign&#233;.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">Le 'type d'&#233;metteur' est absent dans le fichier import&#233;.</parameter>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    $control.table$.ERROR_TYPE = ?,
+                     $control.table$.ERROR_LOG = ?
+              from   $control.table$
+              where  $control.table$.$line.ok$
+              and    $control.table$.ISSUER_TYPE is null
+            ]]>
+    </query>
+  </step>
+  <step error_code="20" id="ConstraintCheck_IssuerType" priority="45" type="control">
+    <description>Mise en erreur des lignes dont le champ &apos;ISSUER_TYPE&apos; ne contient pas: &apos;Standard&apos;, &apos;OPCVM&apos; ou &apos;S&#233;curis&#233;&apos;.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">Le 'type d'&#233;metteur' doit contenir la valeur: &apos;Standard&apos;, &apos;OPCVM&apos; ou &apos;S&#233;curis&#233;&apos;</parameter>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    $control.table$.ERROR_TYPE = ?,
+                     $control.table$.ERROR_LOG = ?
+              from   $control.table$
+              where  $control.table$.$line.ok$
+              and    $control.table$.ISSUER_TYPE not in($sos.constraint$)
+            ]]>
+    </query>
+  </step>
+  <step error_code="10" id="IsNull_SpvFlag" priority="47" type="control">
+    <description>Mise en erreur des lignes dont le SpvFlag n&apos;est pas renseign&#233;.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">Le 'flag SPV' est absent dans le fichier import&#233;.</parameter>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    $control.table$.ERROR_TYPE = ?,
+                     $control.table$.ERROR_LOG = ?
+              from   $control.table$
+              where  $control.table$.$line.ok$
+              and    $control.table$.SPV_FLAG is null
+and    $control.table$.$not.opcvm.line$
+            ]]>
+    </query>
+  </step>
+  <step error_code="20" id="ConstraintCheck_SpvFlag" priority="48" type="control">
+    <description>Mise en erreur des lignes dont le champ &apos;SPV_FLAG&apos; ne contient pas: &apos;Y&apos;, ou &apos;N&apos;.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">Le 'flag SPV' doit contenir la valeur: &apos;Y&apos;, ou &apos;N&apos;</parameter>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    $control.table$.ERROR_TYPE = ?,
+                     $control.table$.ERROR_LOG = ?
+              from   $control.table$
+              where  $control.table$.$line.ok$
+              and    $control.table$.SPV_FLAG not in('Y', 'N')
+and    $control.table$.$not.opcvm.line$
+            ]]>
+    </query>
+  </step>
+

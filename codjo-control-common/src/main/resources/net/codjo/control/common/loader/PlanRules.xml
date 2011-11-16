@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<digester-rules>
+
+    <pattern value="*/plan">
+        <object-create-rule classname="net.codjo.control.common.Plan"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="type"/>
+    </pattern>
+
+    <pattern value="*/step">
+        <object-create-rule classname="net.codjo.control.common.Step"/>
+        <set-properties-rule/>
+        <call-method-rule pattern="error_code" methodname="setErrorCode" paramcount="0"/>
+        <call-method-rule pattern="step_for" methodname="setStepFor" paramcount="0"/>
+        <call-method-rule pattern="class" methodname="setControlClass" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="step_for" prop-name="stepFor"/>
+        </set-properties-rule>
+        <set-properties-rule>
+            <alias attr-name="error_code" prop-name="errorCode"/>
+        </set-properties-rule>
+        <bean-property-setter-rule pattern="id"/>
+        <bean-property-setter-rule pattern="type"/>
+        <bean-property-setter-rule pattern="priority"/>
+        <bean-property-setter-rule pattern="description"/>
+        <bean-property-setter-rule pattern="test"/>
+
+        <call-method-rule pattern="parameter" methodname="addParameter" paramcount="3"
+                          paramtypes="java.lang.Integer,java.lang.String,java.lang.String"/>
+        <call-param-rule pattern="parameter" attrname="index" paramnumber="0"/>
+        <call-param-rule pattern="parameter" attrname="type" paramnumber="1"/>
+        <call-param-rule pattern="parameter" paramnumber="2"/>
+
+        <call-method-rule pattern="query" methodname="setQuery" paramcount="3"/>
+        <call-param-rule pattern="query" attrname="use_temporary_table" paramnumber="0"/>
+        <call-param-rule pattern="query" attrname="ignore_warning" paramnumber="1"/>
+        <call-param-rule pattern="query" paramnumber="2"/>
+
+        <set-next-rule methodname="addStep"/>
+    </pattern>
+
+</digester-rules>
+
+

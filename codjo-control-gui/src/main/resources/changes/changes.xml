@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+    <properties>
+        <title>Changes</title>
+    </properties>
+    <body>
+        <release version="2.08" date="2006-07-07" description="Evolution">
+            <action dev="blazart" type="add">
+                Ajout du bouton d'export Excel par défaut dans les vues des quarantaines.              
+            </action>
+        </release>
+        <release version="2.07" date="2006-05-18" description="Evolution">
+            <action dev="torrent" type="add">
+                Ajout d'une balise root 'entities' dans les fichiers datagen pour la gestion des xsd. Incompatible avec les versions de datagen inférieures à 1.20.
+            </action>
+        </release>   
+        <release version="2.06" date="2006-03-27" description="Evolution">
+    	    <action dev="blazart" type="update">
+    	       Dans l'IHM Système source : liberation du format de date.
+    	    </action>
+        </release>
+        <release version="2.03" date="2005-03-04" description="Evolution">
+    	    <action dev="bernaju" type="update">
+    	       Dans l'IHM Système source, le format de date ddMMyyyy est ajouté.
+    	    </action>
+        </release>
+        <release version="2.02" date="2004-10-19" description="Evolution">
+    	    <action dev="gonnot" type="update">
+    	       Dans l'IHM Système source, le format de date dd/MM/yy et dd/MM/yyyy est ajouté.
+    	    </action>
+        </release>
+        <release version="2.00" date="2004-06-18" description="Evolution">
+    	    <action dev="rivierv" type="add">
+    	       Ajout de l'IHM des sytèmes sources.
+    	    </action>
+        </release>
+    	<release version="1.04" date="2003-12-03" description="Correction">
+    	    <action dev="lajmi" type="add">
+    	       Possibilité d'ajouter une icone dans les menu ou toolbar pour les IHM de Quarantine.
+    	       Pour pouvoir mettre une quarantine dans la toolbar, ou dans le menu avec une icone, il faut spécifier la balise
+    	       icon dans quarantine.xml.
+    	       dans cette balise, il faut soit préciser le chemain complet de l'icone, ou l'id de l'icone
+    	       préalablement ajouté dans l'UIManager.
+    	    </action>
+    	    <action dev="gonnot" type="fix">
+    	       Utilisation d'une RequestFactory lors de la validation d'une ligne.
+    	    </action>
+    	</release>
+        <release version="1.03" date="2003-10-14" description="Amélioration IHM de quarantaine">
+            <action dev="SPINAE" type="add">
+               L'IHM de quarantaine reste ouverte après l'envoie des lignes corrigées.
+               Si les contrôles sont en warning elle recharge automatiquement toutes
+                  les lignes en erreur. 
+            </action>
+            <action dev="SPINAE" type="fix">
+               Prise en compte de la taille des fenetres de quarantaine (800, 400).
+            </action>
+        </release>
+        <release version="1.02" date="2003-09-15" description="Filtre sur la quarantaine">
+            <action dev="GONNOT" type="add">
+               Ajout de la possibilitée de spécifier les filtres sur les IHM liste
+               de quarantaine.
+            </action>
+        </release>
+        <release version="1.01" date="2003-09-05" description="Stabilisation">
+            <action dev="GONNOT" type="fix">
+               Stabilisation des SNAPSHOT.
+            </action>
+        </release>
+        <release version="1.00" date="2003-06-04" description="Version initiale">
+            <action dev="gonnot" type="add">
+                Extraction de la librairie à partir du projet Pims.
+            </action>
+        </release>
+    </body>
+</document>

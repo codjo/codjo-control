@@ -1,0 +1,15 @@
+<step error_code="10" id="IsNull_IssuerCode" priority="5" type="control">
+    <description>Mise en erreur des lignes ...</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">'Code Emetteur' absent...</parameter>
+    <query>
+        <![CDATA[
+              update $control.table$
+              set    ERROR_TYPE = ?, ERROR_LOG = ?
+              from   $control.table$
+              where  $control.table$.$line.ok$
+              and    $control.table$.ISSUER_CODE is null
+            ]]>
+    </query>
+</step>

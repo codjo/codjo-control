@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<integration-plan id="vl_integration_plan">
+
+<description>Plan d'intégration des VL</description>
+
+<dictionary>
+  <variable name="control.table" value="#CTRL_TMP_VL"/>
+  <variable name="line.ok"       value="ANOMALY_TYPE=0"/>
+  <variable name="bad.line"      value="ANOMALY_TYPE=? and ANOMALY_LOG=?"/>
+</dictionary>
+
+<entity>
+   <class>net.codjo.pims.data.FundPrice</class>
+</entity>
+
+<table>create table  $control.table$ (...)</table>
+
+<shipment from="$quarantine$" to="$control.table$">
+    <from-pk-field>QUARANTINE_ID</from-pk-field>
+    <select-where-clause>$ligne qui sont valide$</select-where-clause>
+</shipment>
+
+<plans>
+    <plan>
+        <step id="FirstControl" priority="1" type="filler">
+            <description>Control sur les quantitées</description>
+            <test>net.codjo.orbis.controls.order.SequenceControlTest</test>
+            <parameter index="1" type="int">507</parameter>
+            <parameter index="2" type="string">Séquence non gérée.</parameter>
+            <query><![CDATA[update $control.table$ set $bad.line$ where QUANTITY <> 0]]></query>
+        </step>
+    </plan>
+
+    <plan type="java">
+        <step id="ContinuousControl" priority="10" type="control">
+            <description>
+                 Controle de la continuité des branches.
+            </description>
+            <test>net.codjo.control.common.codification.ContinuousControlTest</test>
+            <class>net.codjo.control.common.loader.FakeControl</class>
+        </step>
+    </plan>
+</plans>
+
+<dispatch>
+    <step id="UpdateQuarantine" priority="2" type="dispatch">
+        <description>une déscription</description>
+        <test>net.codjo.orbis.controls.order.SequenceControlTest</test>
+        <query><![CDATA[update $control.table$ set $bad.line$ where SEQUENCE = 'QT']]></query>
+    </step>
+</dispatch>
+
+</integration-plan>

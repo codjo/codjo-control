@@ -1,0 +1,39 @@
+  <step error_code="10" id="IsNull_IssuerCode" priority="5" type="control">
+    <description>Mise en erreur des lignes dont le code Issuer n&apos;est pas renseign&#233;.</description>
+    <test>NONE</test>
+    <parameter index="1" type="int">$error_code$</parameter>
+    <parameter index="2" type="string">'Code Emetteur' absent dans le fichier import&#233;.</parameter>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    ERROR_TYPE = ?, ERROR_LOG = ?
+              from   $control.table$
+              where  $control.table$.$line.ok$
+              and    $control.table$.ISSUER_CODE is null
+            ]]>
+    </query>
+  </step>
+  <step id="Upper_IssuerCode" priority="10" type="updater">
+    <description>Mise-&#224;-jours du champ ISSUER_CODE en lettres capitales.</description>
+    <test>NONE</test>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    $control.table$.ISSUER_CODE = upper($control.table$.ISSUER_CODE)
+              from   $control.table$
+              where  $control.table$.$line.ok$
+            ]]>
+    </query>
+  </step>
+  <step id="Upper_IssuerName" priority="11" type="updater">
+    <description>Mise-&#224;-jours du champ ISSUER_NAME en lettres capitales.</description>
+    <test>NONE</test>
+    <query>
+      <![CDATA[
+              update $control.table$
+              set    $control.table$.ISSUER_NAME = upper($control.table$.ISSUER_NAME)
+              from   $control.table$
+              where  $control.table$.$line.ok$
+            ]]>
+    </query>
+  </step>

@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/xsl" href="IntegrationPlan.xsl"?>
+<!DOCTYPE integration-plan [
+      <!ENTITY issuer-common             SYSTEM "/PlanPart.xml">
+      ]>
+<integration-plan id="planA" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:noNamespaceSchemaLocation="integrationPlan.xsd">
+    <description>Plan A pour le test de chargement de ApplicationIP.</description>
+    <dictionary>
+        <variable name="control.table" value="#ISSUER_CTRL"/>
+        <variable name="final.table" value="AP_ISSUER"/>
+        <variable name="line.ok" value="ERROR_TYPE &lt;= 0"/>
+    </dictionary>
+    <entity>
+        <class>net.codjo.control.common.loader.ApplicationIP</class>
+    </entity>
+    <table>
+        create table $control.table$(
+        constraint PK_$control.table$ primary key (QUARANTINE_ID))
+    </table>
+    <shipment from="Q_AP_ISSUER" to="$control.table$">
+    </shipment>
+    <plans>
+        <plan>
+            &issuer-common;
+        </plan>
+    </plans>
+</integration-plan>
+

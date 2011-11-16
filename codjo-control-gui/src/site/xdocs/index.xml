@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<document>
+
+    <properties>
+        <title>Librairie Control gui</title>
+    </properties>
+
+    <body>
+        <section name="Control gui">
+            <p>
+                Classe utilitaire permettant de definir grace à un fichier de paramétrage
+                les IHM des tables de quarantaines.
+            </p>
+            <subsection name="Packages">
+                <p>
+                    Description rapide des packages de cette librairie.
+                </p>
+                <table>
+                    <tr>
+                        <th>Package</th>
+                        <th>Commentaire</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="./apidocs/net/codjo/control/gui/package-summary.html">
+                                gui</a>
+                        </td>
+                        <td>
+                            Classes de base du framework control-gui.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="./apidocs/net/codjo/control/gui/data/package-summary.html">
+                                gui.data</a>
+                        </td>
+                        <td>
+                            Structure java de paramétrages des IHM.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="./apidocs/net/codjo/control/gui/util/package-summary.html">
+                                gui.util</a>
+                        </td>
+                        <td>
+                            Classes utilitaires.
+                        </td>
+                    </tr>
+                </table>
+            </subsection>
+        </section>
+        <section name="Notes of use">
+            <p>
+               Le paramétrage des IHM par défaut de la quarantaine se fait via un
+               fichier tel que celui-ci:
+            </p>
+            <source><![CDATA[
+                <quarantines>
+                    <requestTopic>jms/red/RequestTopic</requestTopic>
+                    <structure>/structure.xml</structure>
+
+                    <gui name="Benchmark" tooltip="Affiche la liste des benchmark">
+                        <quarantine>Q_AP_BENCHMARK</quarantine>
+                        <quser>Q_AP_USER_BENCHMARK</quser>
+						<icon>red.quarentine.idIcone</icon>
+                        <window title="Quarantaine des benchmark">
+                            <preference>QUserBenchmarkWindow</preference>
+                            [ <filter>portfolioCode</filter> ]
+                        </window>
+
+                        <detail title="Quarantaine des bench">
+                            <field>portfolioCode</field>
+                            <field>benchCode</field>
+                            ...
+                        </detail>
+                    </gui>
+                </quarantines>
+             ]]></source>
+            <p>
+               Le QuarantineManager placera les menu permettant d'ouvrir les IHM dans
+               le GuiContext, ensuite il faut faire reference dans le fichier menu.xml:
+            </p>
+            <source><![CDATA[
+                <menubar>
+                    ..
+                    <menu>
+                        <name>Quarantaine</name>
+                        <menu gui_contexte_property="Benchmark"/>
+                    ..
+                </menubar>
+             ]]></source>
+            <p>
+               L'initialisation du QuarantineManager se fait de cette manière:
+            </p>
+            <source><![CDATA[
+                QuarantineManager qmngr =
+                    new QuarantineManager(
+                        RedWindow.class.getResourceAsStream("/conf/quarantine.xml"));
+             ]]></source>
+        </section>
+    </body>
+</document>

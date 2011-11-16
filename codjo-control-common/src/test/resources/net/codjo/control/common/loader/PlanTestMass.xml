@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<plan type="mass">
+    <step id="FirstControl" priority="1" type="filler">
+        <description>Control sur les quantitees</description>
+        <test>net.codjo.orbis.controls.order.SequenceControlTest</test>
+        <parameter index="1" type="int">507</parameter>
+        <parameter index="2" type="string">Sequence non geree.</parameter>
+        <query><![CDATA[update $control.table$ set $bad.line$ where QUANTITY <> 0]]></query>
+    </step>
+    <step id="SequenceControl" priority="70" type="control" error_code="5" step_for="uSer">
+        <description>une description</description>
+        <test>net.codjo.orbis.controls.order.SequenceControlTest</test>
+
+        <class>net.codjo.control.common.loader.FakeControl</class>
+     </step>
+</plan>

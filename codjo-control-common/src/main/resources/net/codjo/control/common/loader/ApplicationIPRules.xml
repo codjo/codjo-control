@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<digester-rules>
+    <pattern value="application-controls">
+        <object-create-rule classname="net.codjo.control.common.loader.ApplicationIP"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="name"/>
+    </pattern>
+
+    <pattern value="application-controls/integration-definition">
+        <object-create-rule classname="net.codjo.control.common.loader.IntegrationDefinition"/>
+        <set-properties-rule/>
+        <call-method-rule pattern="plan" methodname="setPlanURI" paramcount="0"/>
+        <set-next-rule methodname="addIntegrationDefinition"/>
+    </pattern>
+
+    <pattern value="application-controls/integration-definition/transfert">
+        <object-create-rule classname="net.codjo.control.common.loader.TransfertData"/>
+        <set-properties-rule/>
+        <call-method-rule pattern="matching/column" methodname="addMatchingCol" paramcount="0"/>
+        <set-next-rule methodname="setTransfert"/>
+    </pattern>
+
+</digester-rules>
+

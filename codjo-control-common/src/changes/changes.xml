@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<document>
+    <properties>
+        <title>Changes</title>
+    </properties>
+    <body>
+        <release version="2.09" date="2006-11-08" description="Evolution">
+            <action dev="gonnot, boissier" type="add">
+                Ajout d'une interface ControlManager de façon à gérer une implémentation agent
+                et une implémentation JEE.
+            </action>
+        </release>
+        <release version="2.07" date="2006-05-18" description="Evolution">
+            <action dev="torrent" type="add">
+                Ajout d'une balise root 'entities' dans les fichiers datagen pour la gestion des xsd.
+                Incompatible avec les versions de datagen inférieures à 1.20.
+            </action>
+        </release>
+        <release version="2.05" date="2006-01-27" description="Evolution">
+            <action dev="blazart" type="fix">
+                Deplacement d'une partie du code en vu de l'adapatation pour JADE.
+            </action>
+        </release>
+        <release version="2.00" date="2004-06-18" description="Evolution">
+            <action dev="rivierv" type="add">
+                Génération de la table PM_SOURCE_SYSTEM.
+            </action>
+        </release>
+        <release version="1.07" date="2004-03-01" description="Correction et Evolution">
+            <action dev="gonnot" type="fix">
+                Correction du bug duplicate key lorsque l'on a 2 plans SQL dans un plan d'integration.
+                La classe net.codjo.control.common.IntegrationPlan a été modifiée pour faire
+                des updates lors de l'execution du 2eme plan SQL.
+            </action>
+            <action dev="gonnot" type="add">
+                Ajout de la notion de contexte pour un control. Ce context est accessible
+                via getContext(), il permet entre autre de remplir correctement les messages
+                de type request (user, requestId).
+            </action>
+        </release>
+        <release version="1.05" date="2004-01-06" description="Evolution">
+            <action dev="palmont" type="update">
+                Modification des classes utilisé par le mapping xml. (remplacement de castor par EasyXML)
+            </action>
+        </release>
+        <release version="1.04" date="2003-11-28" description="Evolution">
+            <action dev="gonnot" type="add">
+                Ajout de l'interface ShipmentProcessor pour rendre parametrable
+                la strategie de transfert.
+            </action>
+        </release>
+        <release version="1.01" date="2003-09-05" description="Stabilisation">
+            <action dev="gonnot" type="fix">
+                Stabilisation des SNAPSHOT.
+            </action>
+        </release>
+        <release version="1.00" date="2003-05-23" description="Version initiale">
+            <action dev="spinae" type="add">
+                Extraction de la librairie à partir du projet Pims.
+            </action>
+        </release>
+    </body>
+</document>

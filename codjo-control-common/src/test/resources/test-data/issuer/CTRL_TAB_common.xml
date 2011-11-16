@@ -1,0 +1,5 @@
+          QUARANTINE_ID                   numeric(23) not null,
+          ISSUER_CODE                     varchar(10)     null,
+
+          ERROR_LOG                       varchar(255)    null,
+          ERROR_TYPE                      int             default 0 not null,

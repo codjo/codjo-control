@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE Scenarii SYSTEM "http://scenarii.dtd">
+<Scenarii name="AUTOMATIC">
+    <Scenario id="ImportDecisiv">
+        <input>
+            <table name="MY_QUARANTINE">
+                <row>
+                    <field name="MY_FIELD_1" value="-5"/>
+                    <field name="ERROR_TYPE" value="-1"/>
+                    <field name="ERROR_LOG" value=""/>
+                </row>
+            </table>
+        </input>
+        <etalon>
+            <table name="MY_QUARANTINE">
+                <row>
+                    <field name="MY_FIELD_1" value="-5"/>
+                    <field name="ERROR_TYPE" value="10"/>
+                    <field name="ERROR_LOG" value="Nombre negatif"/>
+                </row>
+            </table>
+        </etalon>
+    </Scenario>
+</Scenarii>

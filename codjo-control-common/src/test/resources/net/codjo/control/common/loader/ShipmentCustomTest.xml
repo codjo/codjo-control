@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<shipment from="$quarantine$" to="$control.table$">
+    <from-pk-field>QUARANTINE_ID</from-pk-field>
+    <select-where-clause>$ligne qui sont valide$</select-where-clause>
+    <class>net.codjo.control.common.loader.ShipmentMappingTest$MockShipmentProcessor</class>
+</shipment>
+
+

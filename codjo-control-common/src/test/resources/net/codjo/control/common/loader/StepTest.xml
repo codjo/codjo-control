@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<step id="SequenceControl" priority="70" type="control" error_code="5" step_for="uSer">
+ <description>une déscription</description>
+ <test>net.codjo.orbis.controls.order.SequenceControlTest</test>
+
+ <parameter index="1" type="int">507</parameter>
+ <parameter index="2" type="string">Séquence non gérée.</parameter>
+
+ <query use_temporary_table="#TEMP" ignore_warning="010P4"><![CDATA[QUANTITY <> 0]]></query>
+ <class>net.codjo.control.common.loader.FakeControl</class>
+</step>

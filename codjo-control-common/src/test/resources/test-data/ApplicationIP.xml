@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application-controls name="RED">
+    <integration-definition>
+        <plan>src/test/resources/test-data/IP_AP_ISSUER.xml</plan>
+        <transfert quarantine="Q_AP_ISSUER" user="Q_AP_USER_ISSUER"/>
+    </integration-definition>
+</application-controls>

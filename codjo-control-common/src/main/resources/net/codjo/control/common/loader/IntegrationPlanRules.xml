@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<digester-rules>
+    <pattern value="*/integration-plan">
+        <object-create-rule classname="net.codjo.control.common.IntegrationPlan"/>
+        <bean-property-setter-rule pattern="description"/>
+        <call-method-rule pattern="table" methodname="setControlTableDef" paramcount="0"/>
+        <set-properties-rule/>
+    </pattern>
+
+    <pattern value="*/entity">
+        <object-create-rule classname="net.codjo.control.common.Entity"/>
+        <call-method-rule pattern="class" methodname="setBeanClassName" paramcount="0"/>
+        <call-method-rule pattern="batch-class" methodname="setBatchClassName" paramcount="0"/>
+        <set-next-rule methodname="setEntity"/>
+    </pattern>
+
+    <pattern value="*/dispatch">
+        <object-create-rule classname="net.codjo.control.common.Plan"/>
+        <set-next-rule methodname="setDispatch"/>
+    </pattern>
+
+    <pattern value="*/plans">
+        <object-create-rule classname="net.codjo.control.common.PlansList"/>
+        <set-next-rule methodname="setPlanList"/>
+    </pattern>
+
+    <pattern value="*/plans_delete">
+        <object-create-rule classname="net.codjo.control.common.PlansList"/>
+        <set-next-rule methodname="setPlanListForDelete"/>
+    </pattern>
+
+    <pattern value="*/abstract-steps">
+        <object-create-rule classname="net.codjo.control.common.StepsList"/>
+        <set-next-rule methodname="setAbstractSteps"/>
+    </pattern>
+
+    <!-- ######################################################################### -->
+    <!-- ########################### BEGIN DICTIONARY ############################ -->
+    <!-- ######################################################################### -->
+    <pattern value="*/dictionary">
+        <object-create-rule classname="net.codjo.control.common.Dictionary"/>
+        <set-next-rule methodname="setDictionary"/>
+    </pattern>
+
+    <pattern value="*/dictionary/variable">
+        <object-create-rule classname="net.codjo.control.common.Variable"/>
+        <set-properties-rule/>
+        <set-next-rule methodname="addVariable"/>
+    </pattern>
+    <!-- ######################################################################### -->
+    <!-- ########################### END DICTIONARY ############################ -->
+    <!-- ######################################################################### -->
+
+    <!-- ######################################################################### -->
+    <!-- #########include########### BEGIN PLAN ################################## -->
+    <!-- ######################################################################### -->
+    <pattern value="*/plan">
+        <object-create-rule classname="net.codjo.control.common.Plan"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="type"/>
+        <set-next-rule methodname="addPlan"/>
+    </pattern>
+
+    <pattern value="*/step">
+        <factory-create-rule classname="net.codjo.control.common.loader.StepFactory"/>
+        <set-properties-rule/>
+        <call-method-rule pattern="error_code" methodname="setErrorCode" paramcount="0"/>
+        <call-method-rule pattern="step_for" methodname="setStepFor" paramcount="0"/>
+        <call-method-rule pattern="class" methodname="setControlClass" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="step_for" prop-name="stepFor"/>
+        </set-properties-rule>
+        <set-properties-rule>
+            <alias attr-name="error_code" prop-name="errorCode"/>
+        </set-properties-rule>
+        <set-properties-rule>
+            <alias attr-name="error_message" prop-name="errorMessage"/>
+        </set-properties-rule>
+        <bean-property-setter-rule pattern="id"/>
+        <bean-property-setter-rule pattern="type"/>
+        <bean-property-setter-rule pattern="priority"/>
+        <bean-property-setter-rule pattern="description"/>
+        <bean-property-setter-rule pattern="test"/>
+
+        <call-method-rule pattern="parameter" methodname="addParameter" paramcount="3"
+                          paramtypes="java.lang.Integer,java.lang.String,java.lang.String"/>
+        <call-param-rule pattern="parameter" attrname="index" paramnumber="0"/>
+        <call-param-rule pattern="parameter" attrname="type" paramnumber="1"/>
+        <call-param-rule pattern="parameter" paramnumber="2"/>
+
+        <call-method-rule pattern="query" methodname="setQuery" paramcount="3"/>
+        <call-param-rule pattern="query" attrname="use_temporary_table" paramnumber="0"/>
+        <call-param-rule pattern="query" attrname="ignore_warning" paramnumber="1"/>
+        <call-param-rule pattern="query" paramnumber="2"/>
+
+        <set-next-rule methodname="addStep"/>
+    </pattern>
+
+    <!-- ######################################################################### -->
+    <!-- ##########################  END PLAN #################################### -->
+    <!-- ######################################################################### -->
+
+    <!-- ######################################################################### -->
+    <!-- #########include########### BEGIN SHIPMENT ############################## -->
+    <!-- ######################################################################### -->
+    <pattern value="*/shipment">
+        <object-create-rule classname="net.codjo.control.common.Shipment"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="to"/>
+        <bean-property-setter-rule pattern="from"/>
+        <call-method-rule pattern="class" methodname="setProcessorClass" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="class" prop-name="processorClass"/>
+        </set-properties-rule>
+        <call-method-rule pattern="select-where-clause" methodname="setSelectWhereClause" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="select-where-clause" prop-name="selectWhereClause"/>
+        </set-properties-rule>
+        <call-method-rule pattern="from-pk-field" methodname="setFromPk" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="from-pk-field" prop-name="fromPk"/>
+        </set-properties-rule>
+        <set-next-rule methodname="setShipment"/>
+    </pattern>
+    <!-- ######################################################################### -->
+    <!-- ##########################  END SHIPMENT ################################ -->
+    <!-- ######################################################################### -->
+</digester-rules>
+
+
+
+
+
+
+
+
+
+
+

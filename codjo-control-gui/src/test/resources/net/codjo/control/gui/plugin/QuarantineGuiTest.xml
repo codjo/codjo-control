@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<quarantines>
+    <requestTopic>jms/pims/RequestTopic</requestTopic>
+
+    <gui name="Benchmark" tooltip="Affiche la liste des benchmark">
+        <quarantine>Q_AP_BENCHMARK</quarantine>
+        <quser>Q_AP_USER_BENCHMARK</quser>
+        <window title="Quarantaine des benchmark">
+            <preference>QUserBenchmarkWindow</preference>
+            <filter>portfolioCode</filter>
+        </window>
+
+        <detail title="Quarantaine des bench" nbFieldsByPage="5" windowWidth="800" windowHeight="600">
+            <field>portfolioCode</field>
+            <field>benchCode</field>
+        </detail>
+    </gui>
+
+    <gui name="Coupon" tooltip="Affiche la liste des coupons">
+        <quarantine>Q_AP_DIVIDEND</quarantine>
+
+        <window title="Quarantaine des coupons">
+            <preference>QUserCouponWindow</preference>
+        </window>
+    </gui>
+
+    <gui name="Emetteur" tooltip="Affiche la liste des emetteurs">
+        <quarantine>Q_AP_ISSUER</quarantine>
+        <window title="Liste quarantaine des emetteurs avec taille customisée" windowWidth="500"
+                windowHeight="300">
+            <preference>QUserIssuerWindow</preference>
+            <dbFilter>issuerCode</dbFilter>
+            <dbFilter renderer="net.codjo.control.gui.plugin.ComboBoxRenderer">source</dbFilter>
+            <dbFilter>user</dbFilter>
+        </window>
+    </gui>
+
+    <gui name="Emetteur" tooltip="Affiche la liste des emetteurs">
+        <quarantine>Q_AP_ISSUER</quarantine>
+        <icon>FTitres.jpg</icon>
+        <window title="Liste quarantaine des emetteurs">
+            <preference>QUserIssuerWindow</preference>
+            <dbFilter>issuerCode</dbFilter>
+            <dbFilter renderer="net.codjo.control.gui.plugin.ComboBoxRenderer">source</dbFilter>
+            <dbFilter>user</dbFilter>
+        </window>
+        <detail title="Detail quarantaine des emetteurs" nbFieldsByPage="5">
+            <tab title="Caracteristiques">
+                <field>issuerCode</field>
+                <field>issuerName</field>
+            </tab>
+            <tab title="Audit">
+                <field>date</field>
+                <field>user</field>
+                <field>source</field>
+            </tab>
+        </detail>
+    </gui>
+</quarantines>
+

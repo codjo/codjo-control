@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<entities>
+    <entity name="net.codjo.control.data.SourceSystem" table="PM_SOURCE_SYSTEM">
+        <description>Les systèmes sources</description>
+
+        <feature>
+            <sql-index>
+                <idx type="primary-key" name-prefix="X1_" clustered="true"/>
+            </sql-index>
+            <generate-all/>
+
+        </feature>
+
+        <primary-key>
+            <field name="sourceSystem"/>
+        </primary-key>
+
+        <properties>
+            <field name="sourceSystem" type="string">
+                <description>Système source</description>
+                <sql type="varchar" precision="10" required="true"/>
+            </field>
+
+            <field name="dateFormat" type="string">
+                <description>Format de la date</description>
+                <sql type="varchar" precision="20"/>
+            </field>
+
+            <field name="decimalSeparator" type="string">
+                <description>Séparateur décimal</description>
+                <sql type="varchar" precision="1"/>
+            </field>
+        </properties>
+    </entity>
+    <entity name="net.codjo.control.data.QuarantineUser">
+        <description>Handler pour les filtres DB dans l'IHM de quarantine</description>
+        <feature>
+            <handler-sql id="selectAllQuarantineValuesForFieldName">
+                <attributes>
+                    <name>value</name>
+                </attributes>
+                <query factory="net.codjo.control.server.handler.DbFilterSelectorFactory"/>
+            </handler-sql>
+            <handler-sql id="selectAllQuarantineColumnsFromTable">
+                <attributes>
+                    <name>value</name>
+                </attributes>
+                <query factory="net.codjo.control.server.handler.DbFilterColumnSelectorFactory"/>
+            </handler-sql>
+        </feature>
+    </entity>
+</entities>

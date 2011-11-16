@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<project name="CONTROL">
+    <title>COMMON</title>
+    <body>
+        <links>
+            <item name="Bug" href="http://4ddev02:8080/mantis"/>
+            <item name="Wiki" href="http://4ddev02/vqwiki/jsp/Wiki?LibrairieControl"/>
+        </links>
+        <menu name="Overview">
+            <item name="Presentation" href="/index.html"/>
+            <item name="Exemple" href="/samplePlan.html"/>
+            <item name="Historique" href="/changes-report.html"/>
+        </menu>
+    </body>
+</project>

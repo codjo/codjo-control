@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<document>
+
+    <properties>
+        <title>codjo-control-common</title>
+    </properties>
+
+    <body>
+        <section name="Control-common">
+            <p>
+                Librairie responsable des controles
+            </p>
+            <subsection name="Packages">
+                <p>
+                    Description rapide des packages de cette librairie.
+                </p>
+                <table>
+                    <tr>
+                        <th>Package</th>
+                        <th>Commentaire</th>
+                    </tr>
+                    <!-- ................................................................ -->
+                    <!--  net.codjo.control.common                                          -->
+                    <!-- ................................................................ -->
+                    <tr>
+                        <td>
+                            <a href="./apidocs/net/codjo/control/common/package-summary.html">
+                                common</a>
+                        </td>
+                        <td>
+                            Classes de base.
+                        </td>
+                    </tr>
+                    <!-- ................................................................ -->
+                    <!--  net.codjo.control.common.util                                     -->
+                    <!-- ................................................................ -->
+                    <tr>
+                        <td>
+                            <a href="./apidocs/net/codjo/control/common/util/package-summary.html">
+                                util</a>
+                        </td>
+                        <td>
+                            Classes utilitaires.
+                        </td>
+                    </tr>
+                </table>
+            </subsection>
+        </section>
+                <section name="Nouveauté">
+            <p>
+                Dans un plan (dispatch - plan), il est maintenant possible de préciser un type <b>mass</b> <br/>
+                qui permet de faire un traitement en masse, a la différence du traitement ligne … ligne.<br/>
+                
+                <source><![CDATA[
+                <dispatch type="mass">
+                	<step id=".." priority="10" type="dispatch">
+      				<description>...</description>
+      				<test>NONE</test>
+      				<query>
+        			.....................
+      				</query>
+    			</step>
+    			<step id="purge" priority="70" type="dispatch" step_for="all">
+            			<description>...</description>
+            			<test>net.codjo.red.control.ejb.security.CleanSecurityCallerTest</test>
+            			<class>net.codjo.red.control.ejb.security.CleanSecurityCaller</class>
+    			</step>
+            ]]></source></p>
+            <p>
+                L'exemple ci-dessus montre un plan de type mass dans lequel se trouvent des steps de type sql et java.<br/>
+                La step java permet d'appeller une classe qui doit implémenter l'interface net.codjo.control.common.MassControl.
+            </p>
+        </section>
+    </body>
+</document>

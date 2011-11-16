@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet type="text/xsl" href="IntegrationPlan.xsl"?>
+<integration-plan id="TestPlan"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:noNamespaceSchemaLocation="integration-plan.xsd">
+    <description>Plan d'intégration de la table MY_QUARANTINE.</description>
+    <dictionary>
+        <variable name="quarantine" value="MY_QUARANTINE"/>
+        <variable name="control.table" value="#MY_QUARANTINE"/>
+        <variable name="line.ok" value="ERROR_TYPE &lt;= 0"/>
+        <variable name="line.nok" value="ERROR_TYPE &gt; 0"/>
+    </dictionary>
+
+    <table>
+        create table $control.table$(
+        MY_FIELD_1 numeric not null,
+        ERROR_TYPE numeric null,
+        ERROR_LOG varchar(255) null,
+        constraint PK_$control.table$ primary key (MY_FIELD_1) )
+    </table>
+
+    <shipment from="$quarantine$" to="$control.table$">
+        <from-pk-field>MY_FIELD_1</from-pk-field>
+        <select-where-clause>$line.ok$</select-where-clause>
+    </shipment>
+
+    <plans>
+        <plan>
+            <step id="toto" priority="10" type="control" error_code="15"
+                  step_for="batch">
+                <description></description>
+                <test>NONE</test>
+                <query>
+                    <![CDATA[
+                        update $control.table$
+                        set ERROR_TYPE = 10, ERROR_LOG = 'Nombre negatif'
+                        where $line.ok$
+                        and MY_FIELD_1 < 0
+                        ]]>
+                </query>
+            </step>
+        </plan>
+    </plans>
+    <dispatch>
+        <step id="updateQuarantine" priority="10" type="jesaispas">
+            <description>MAJ de la table de quarantine.</description>
+            <test>NONE</test>
+            <query><![CDATA[
+            update $quarantine$
+            set ERROR_TYPE = $control.table$.ERROR_TYPE,
+                ERROR_LOG = $control.table$.ERROR_LOG
+            from $control.table$ inner join $quarantine$
+            on $quarantine$.MY_FIELD_1 = $control.table$.MY_FIELD_1
+            where $control.table$.$line.nok$
+        ]]></query>
+        </step>
+    </dispatch>
+</integration-plan>
+

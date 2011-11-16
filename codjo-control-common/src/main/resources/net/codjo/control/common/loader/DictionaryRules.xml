@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<digester-rules>
+    <pattern value="*/dictionary">
+        <object-create-rule classname="net.codjo.control.common.Dictionary"/>
+    </pattern>
+    <pattern value="*/dictionary/variable">
+        <object-create-rule classname="net.codjo.control.common.Variable"/>
+        <set-properties-rule/>
+        <set-next-rule methodname="addVariable"/>
+    </pattern>
+</digester-rules>

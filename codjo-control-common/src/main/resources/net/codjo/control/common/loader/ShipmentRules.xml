@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<digester-rules>
+    <pattern value="*/shipment">
+        <object-create-rule classname="net.codjo.control.common.Shipment"/>
+        <set-properties-rule/>
+        <bean-property-setter-rule pattern="to"/>
+        <bean-property-setter-rule pattern="from"/>
+        <call-method-rule pattern="class" methodname="setProcessorClass" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="class" prop-name="processorClass"/>
+        </set-properties-rule>
+        <call-method-rule pattern="select-where-clause" methodname="setSelectWhereClause" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="select-where-clause" prop-name="selectWhereClause"/>
+        </set-properties-rule>
+        <call-method-rule pattern="from-pk-field" methodname="setFromPk" paramcount="0"/>
+        <set-properties-rule>
+            <alias attr-name="from-pk-field" prop-name="fromPk"/>
+        </set-properties-rule>
+
+    </pattern>
+
+</digester-rules>
+

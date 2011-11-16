@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<application-controls name="RED">
+    <integration-definition>
+        <plan>/planA.xml</plan>
+    </integration-definition>
+
+    <integration-definition>
+        <plan>/planB.xml</plan>
+        <transfert quarantine="Q_AP_BENCHMARK" user="Q_AP_USER_BENCHMARK"/>
+    </integration-definition>
+
+    <integration-definition>
+        <plan>/planC.xml</plan>
+        <transfert quarantine="Q_AP_BENCH_C" user="Q_AP_USER_BENCH_C" replaceUserData="true">
+           <matching>
+               <column>COL_A</column>
+               <column>COL_B</column>
+           </matching>
+        </transfert>
+    </integration-definition>
+</application-controls>
+

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<dictionary>
+  <variable name="control.table" value="#CTRL_TMP_VL"/>
+  <variable name="line.ok"       value="ANOMALY_TYPE=0"/>
+  <variable name="bad.line"      value="ANOMALY_TYPE=? and ANOMALY_LOG=?"/>
+</dictionary>

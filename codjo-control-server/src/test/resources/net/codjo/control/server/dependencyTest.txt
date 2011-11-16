@@ -1,0 +1,38 @@
+net.codjo.control.server
+
+net.codjo.control.server.api
+	-> net.codjo.aspect
+	-> net.codjo.test.common.mock
+
+net.codjo.control.server.audit
+    -> net.codjo.workflow.common.message
+
+net.codjo.control.server.plugin
+	-> net.codjo.agent
+	-> net.codjo.agent.test
+	-> net.codjo.aspect
+	-> net.codjo.aspect.util
+	-> net.codjo.control.common
+	-> net.codjo.control.common.loader
+	-> net.codjo.control.common.message
+	-> net.codjo.control.server.api
+	-> net.codjo.database.common.api
+	-> net.codjo.database.common.api.structure
+	-> net.codjo.imports.common.message
+	-> net.codjo.mad.server.plugin
+	-> net.codjo.plugin.server
+	-> net.codjo.sql.server
+	-> net.codjo.test.common
+	-> net.codjo.test.common.mock
+	-> net.codjo.tokio
+	-> net.codjo.workflow.common.message
+	-> net.codjo.workflow.common.organiser
+	-> net.codjo.workflow.server.api
+	-> net.codjo.workflow.server.organiser
+	-> net.codjo.workflow.server.plugin
+	-> org.mockito
+	-> org.mockito.internal.progress
+
+net.codjo.control.server.util
+	-> net.codjo.control.common
+	-> net.codjo.mad.server.handler

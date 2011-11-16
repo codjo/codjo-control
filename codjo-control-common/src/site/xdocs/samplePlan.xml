@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+
+<document>
+
+    <properties>
+        <title>Exemple</title>
+    </properties>
+
+    <body>
+        <section name="Plan d'integration">
+            <p>Exemple de Plan<source>
+                <![CDATA[
+<integration-plan id="vl_integration_plan"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="D:\pims\ModuleData\xml\integrationPlan.xsd">
+
+    <description>Plan d'intégration des VL.</description>
+
+    <dictionary>
+        <variable name="quarantine" value="Q_AP_FUND_PRICE"/>
+        ...
+        <variable name="line.ok" value="ERROR_TYPE &lt;= 0"/>
+    </dictionary>
+
+    <entity>
+        <class>net.codjo.pims.data.FundPrice</class>
+    </entity>
+
+    <table>
+        create table  $control.table$(
+        QUARANTINE_ID  numeric(23) not null,
+        ...
+        ERROR_TYPE     int         default 0 not null,
+        constraint PK_$control.table$ primary key (QUARANTINE_ID)  )
+    </table>
+
+    <shipment from="$quarantine$" to="$control.table$">
+        <from-pk-field>QUARANTINE_ID</from-pk-field>
+        <select-where-clause>$line.ok$</select-where-clause>
+        <class>net.codjo.red.control.RedShipmentProcessor</class>
+    </shipment>
+
+    <plans>
+        <plan>
+            <step id="ValuationDateControl" priority="1" type="control" error_code="666" step_for="batch">
+                <description>
+                    Controle de la cohérence de la date de valo.
+                </description>
+                <test>NONE</test>
+                <parameter index="1" type="int">$error_code$</parameter>
+                <parameter index="2" type="string">Date de valorisation nulle.</parameter>
+                <query use_temporary_table="#TEMP" ignore_warning="010P4" >
+                  update $control.table$
+                  set ERROR_TYPE = ?, ERROR_LOG = ?
+                  from $control.table$
+                  where $control.table$.VALUATION_DATE is null
+                    and $control.table$.$line.ok$
+               </query>
+            </step>
+            ...
+        </plan>
+
+        <plan type="java">
+            <step id="GlobalAdjustementCalcul" priority="10" type="calcul">
+                <description>
+                    Calcul d'ajustement Global.
+                </description>
+                <test>net.codjo.pims.control.fundprice.GlobalAdjustementCalculTest</test>
+                <class>net.codjo.pims.control.fundprice.GlobalAdjustementCalcul</class>
+            </step>
+            ...
+        </plan>
+    </plans>
+
+    <plans_delete>
+        <plan type="java">
+            ...
+        </plan>
+    </plans_delete>
+    <dispatch>
+        <step id="UPDATE_QUARANTINE_BAD_STATUS" priority="1" type="dispatch">
+            ...
+        </step>
+    </dispatch>
+</integration-plan>
+	 ]]></source></p>
+        </section>
+    </body>
+</document>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE project [
+      <!ENTITY param  SYSTEM "@basedir@/conf/datagen/codjo-control-def.xml">
+      ]>
+<data>
+    <configuration>
+        <project>
+            <name>TestDataGen</name>
+        </project>
+        <path>
+            <sql>target/datagen/Sql</sql>
+            <sql-index>target/datagen/Sql</sql-index>
+            <trigger>target/datagen/Sql</trigger>
+            <bean>target/datagen/data</bean>
+            <handlers>target/datagen/handler</handlers>
+            <castor>target/datagen/data</castor>
+            <cmdHandler>target/datagen/handler</cmdHandler>
+            <structure>target/datagen</structure>
+            <requetor>target/datagen</requetor>
+        </path>
+    </configuration>
+    &param;
+</data>

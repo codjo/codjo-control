@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+     | POM Relationships
+     -->
+
+    <parent>
+        <groupId>net.codjo.pom</groupId>
+        <artifactId>codjo-pom-library</artifactId>
+        <version>SNAPSHOT</version>
+    </parent>
+    <groupId>net.codjo.control</groupId>
+    <artifactId>codjo-control</artifactId>
+    <version>3.48-SNAPSHOT</version>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.codjo.control</groupId>
+                <artifactId>codjo-control-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!--
+     | Build Settings
+     -->
+
+    <packaging>pom</packaging>
+    <modules>
+        <module>codjo-control-common</module>
+        <module>codjo-control-gui</module>
+        <module>codjo-control-server</module>
+    </modules>
+
+    <!--
+    | Project Information
+    -->
+
+    <name>Lib &gt; Control</name>
+    <description>
+        Regroupement des diff�rentes librairies permettant de faire
+        des controles de donn�es provenant soit d'un import soit de l'IHM (IHM/NOYAU).
+    </description>
+    <inceptionYear>2003</inceptionYear>
+
+    <!--
+    | Environment Information
+    -->
+
+    <scm>
+        <connection>scm:git:https://github.com/codjo/codjo-control.git</connection>
+        <developerConnection>scm:git:https://github.com/codjo/codjo-control.git</developerConnection>
+        <url>https://github.com/codjo/codjo-control</url>
+    </scm>
+
+</project>

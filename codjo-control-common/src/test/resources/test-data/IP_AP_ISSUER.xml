@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?xml-stylesheet type="text/xsl" href="IntegrationPlan.xsl"?>
+<!DOCTYPE integration-plan [
+      <!ENTITY ctrl-tab-common           SYSTEM "file://src/test/resources/test-data/issuer/CTRL_TAB_common.xml">
+      <!ENTITY issuer-common             SYSTEM "file://src/test/resources/test-data/issuer/ISSUER_common.xml">
+      <!ENTITY ap-issuer-control         SYSTEM "file://src/test/resources/test-data/issuer/AP_ISSUER_control.xml">
+      ]>
+<integration-plan id="ap_issuer_integration_plan" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:noNamespaceSchemaLocation="integrationPlan.xsd">
+    <description>Plan d&apos;int&#233;gration de la table AP_ISSUER.</description>
+    <dictionary>
+        <variable name="sos.constraint"
+                  value="&apos;Standard&apos;, &apos;OPCVM&apos;, &apos;S&#233;curis&#233;&apos;"/>
+        <variable name="control.table" value="#ISSUER_CTRL"/>
+        <variable name="final.table" value="AP_ISSUER"/>
+        <variable name="line.ok" value="ERROR_TYPE &lt;= 0"/>
+        <variable name="opcvm.line" value="ISSUER_TYPE = 'OPCVM'"/>
+        <variable name="not.opcvm.line" value="ISSUER_TYPE &lt;&gt; 'OPCVM'"/>
+    </dictionary>
+    <entity>
+        <class>net.codjo.control.common.loader.ApplicationIP</class>
+    </entity>
+    <table>
+        create table $control.table$(
+        &ctrl-tab-common;
+        constraint PK_$control.table$ primary key (QUARANTINE_ID))
+    </table>
+    <shipment from="Q_AP_ISSUER" to="$control.table$">
+    </shipment>
+    <plans>
+        <plan>
+            &issuer-common;
+            &ap-issuer-control;
+
+            <step id="Filler_creationDate_lastUpdateDate" priority="900" step_for="user" type="filler">
+                <description>Remplissage des champs d'audit.</description>
+                <test>NONE</test>
+                <query>
+                    <![CDATA[
+              update     $control.table$
+              set        CREATION_DATE =
+              case when  CREATION_DATE is null
+                   then  getdate()
+                   else  CREATION_DATE
+                   end,
+                         LAST_UPDATE_DATE = getdate()
+              from       $control.table$
+              where      $control.table$.$line.ok$
+            ]]>
+                </query>
+            </step>
+        </plan>
+    </plans>
+</integration-plan>
+
