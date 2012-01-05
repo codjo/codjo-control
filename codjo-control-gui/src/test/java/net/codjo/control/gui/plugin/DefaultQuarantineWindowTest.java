@@ -1,4 +1,8 @@
 package net.codjo.control.gui.plugin;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JInternalFrame;
 import net.codjo.agent.AgentContainerMock;
 import net.codjo.agent.UserId;
 import net.codjo.agent.test.Semaphore;
@@ -27,10 +31,6 @@ import net.codjo.mad.gui.request.RequestComboBox;
 import net.codjo.mad.gui.request.RequestTable;
 import net.codjo.security.common.api.UserMock;
 import net.codjo.test.common.LogString;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import javax.swing.JInternalFrame;
 import org.uispec4j.ComboBox;
 import org.uispec4j.Trigger;
 import org.uispec4j.UISpecTestCase;
@@ -108,10 +108,29 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
 
     public void test_dbFilters_loadOnInit() throws Exception {
         log.assertContent(
-              "filter combo : data source loaded(), filter combo : data source loaded(), filter combo : data source loaded()");
+              "filter combo : data source loaded(), filter combo : data source loaded(), filter combo : data source loaded(), filters loaded()");
 
         assertEquals("Tout", userCombo.getDataSource().getSelectedRow().getFieldValue("value"));
         assertEquals("Tout", sourceCombo.getDataSource().getSelectedRow().getFieldValue("value"));
+    }
+
+
+    public void test_dbFilters_reloadOnTableLoad() throws Exception {
+        MadServerFixture madServerFixture = new MadServerFixture();
+        madServerFixture.doSetUp();
+        guiContext.setSender(new Sender(madServerFixture.getOperations()));
+
+        initWindow(2, new ListDataSource());
+        madServerFixture.mockServerResult(createSelectResult());
+
+        log.clear();
+
+        RequestTable requestTable = (RequestTable)window.getTable().getJTable();
+        requestTable.load();
+
+        log.assertContent(
+              "filter combo : data source loaded(), filter combo : data source loaded(), filter combo : data source loaded(), filters loaded()");
+        madServerFixture.doTearDown();
     }
 
 
@@ -191,6 +210,13 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
     private void initWindow(final int windowIndex) throws Exception {
         QuarantineGuiData guiData = (QuarantineGuiData)manager.getList().getDataList().toArray()[windowIndex];
         window = new Window(new DefaultQuarantineWindowMock(guiContext, guiData, userId));
+        initDataSources(window);
+    }
+
+
+    private void initWindow(final int windowIndex, ListDataSource dataSource) throws Exception {
+        QuarantineGuiData guiData = (QuarantineGuiData)manager.getList().getDataList().toArray()[windowIndex];
+        window = new Window(new DefaultQuarantineWindowMock(guiContext, guiData, userId, dataSource));
         initDataSources(window);
     }
 
@@ -326,13 +352,29 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
 
     private class DefaultQuarantineWindowMock extends DefaultQuarantineWindow {
 
-        DefaultQuarantineWindowMock(GuiContext rootCtxt, QuarantineGuiData gui, UserId userId)
-              throws Exception {
+        DefaultQuarantineWindowMock(GuiContext rootCtxt, QuarantineGuiData gui,
+                                    UserId userId, ListDataSource listDataSource) throws Exception {
+            super(rootCtxt, gui, userId, listDataSource);
+            allFieldsSelector.addField("issuerCode", "Tout");
+            allFieldsSelector.addField("user", "Tout");
+            allFieldsSelector.addField("source", "Tout");
+            loadFilters();
+        }
+
+
+        DefaultQuarantineWindowMock(GuiContext rootCtxt, QuarantineGuiData gui, UserId userId) throws Exception {
             super(rootCtxt, gui, userId, new MockDataSource("main table", log));
             allFieldsSelector.addField("issuerCode", "Tout");
             allFieldsSelector.addField("user", "Tout");
             allFieldsSelector.addField("source", "Tout");
             loadFilters();
+        }
+
+
+        @Override
+        void loadFilters() {
+            super.loadFilters();
+            log.call("filters loaded");
         }
 
 
