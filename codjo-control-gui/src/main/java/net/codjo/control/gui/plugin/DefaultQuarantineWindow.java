@@ -1,4 +1,25 @@
 package net.codjo.control.gui.plugin;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EventObject;
+import java.util.Iterator;
+import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JInternalFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import net.codjo.agent.AgentContainer;
 import net.codjo.agent.UserId;
 import net.codjo.control.common.message.TransferJobRequest;
@@ -33,31 +54,12 @@ import net.codjo.mad.gui.request.RequestComboBox;
 import net.codjo.mad.gui.request.RequestRecordCountField;
 import net.codjo.mad.gui.request.RequestTable;
 import net.codjo.mad.gui.request.RequestToolBar;
+import net.codjo.mad.gui.request.event.DataSourceAdapter;
+import net.codjo.mad.gui.request.event.DataSourceEvent;
 import net.codjo.mad.gui.request.factory.SelectFactory;
 import net.codjo.mad.gui.structure.StructureCache;
 import net.codjo.util.string.StringUtil;
 import net.codjo.workflow.common.schedule.ScheduleLauncher;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EventObject;
-import java.util.Iterator;
-import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JInternalFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 
 class DefaultQuarantineWindow extends JInternalFrame {
     private static final String QUARANTINE_TO_USER = "Erreur lors du transfert de quarantaine vers user";
@@ -70,7 +72,7 @@ class DefaultQuarantineWindow extends JInternalFrame {
     private GuiContext guiContext;
     private RequestTable requestTable;
     private boolean preventReloadFilterPanel;
-    private FilterPanel filterPanel;
+    private QuarantineFilterPanel filterPanel;
     private RequestToolBar toolBar;
     private ProgressBarLabel progressBarLabel;
     protected FieldsList allFieldsSelector;
@@ -110,6 +112,14 @@ class DefaultQuarantineWindow extends JInternalFrame {
         requestTable = new RequestTable(mainDataSource);
         requestTable.setPreference(PreferenceFactory.getPreference(guiData.getWindow().getPreference()));
         requestTable.setName("requestTable");
+        mainDataSource.addDataSourceListener(new DataSourceAdapter() {
+            @Override
+            public void beforeLoadEvent(DataSourceEvent event) {
+                if (!filterPanel.isRunning()) {
+                    loadFilters();
+                }
+            }
+        });
     }
 
 
@@ -277,20 +287,18 @@ class DefaultQuarantineWindow extends JInternalFrame {
                 if (filter instanceof RequestComboBox) {
                     RequestComboBox comboBox = (RequestComboBox)filter;
                     preventReloadFilterPanel = true;
-                    ListDataSource source = comboBox.getDataSource();
-                    source.load();
-                    Result loadResult = source.getLoadResult();
-                    List<Row> rows = loadResult.getRows();
-                    if (rows == null) {
-                        rows = new ArrayList<Row>();
+                    String oldFilterSelection = getCurrentFilterSelection(comboBox);
+                    reloadFilter(comboBox);
+
+                    if (!selectFilter(comboBox, oldFilterSelection)) {
+                        if (oldFilterSelection != null) {
+                            preventReloadFilterPanel = false;
+                        }
+                        comboBox.setSelectedIndex(0);
                     }
-                    Row newRow = new Row();
-                    newRow.addField("value", TOUT);
-                    rows.add(0, newRow);
-                    loadResult.setRows(rows);
-                    comboBox.getDataSource().setLoadResult(loadResult);
-                    comboBox.setSelectedIndex(0);
+
                     comboBox.setPreferredSize(comboBox.getPreferredSizeForContent());
+
                     preventReloadFilterPanel = false;
                 }
             }
@@ -298,6 +306,38 @@ class DefaultQuarantineWindow extends JInternalFrame {
         catch (RequestException exception) {
             ErrorDialog.show(this, "Erreur lors du chargement des filtres DB.", exception);
         }
+    }
+
+
+    private boolean selectFilter(RequestComboBox comboBox, String filter) {
+        Object currentSelection = comboBox.getSelectedItem();
+        comboBox.setSelectedItem(filter);
+        return comboBox.getSelectedItem() != currentSelection;
+    }
+
+
+    private void reloadFilter(RequestComboBox comboBox) throws RequestException {
+        comboBox.getDataSource().load();
+        Result loadResult = comboBox.getDataSource().getLoadResult();
+        List<Row> rows = loadResult.getRows();
+        if (rows == null) {
+            rows = new ArrayList<Row>();
+        }
+        Row newRow = new Row();
+        newRow.addField("value", TOUT);
+        rows.add(0, newRow);
+        loadResult.setRows(rows);
+        comboBox.getDataSource().setLoadResult(loadResult);
+    }
+
+
+    private String getCurrentFilterSelection(RequestComboBox comboBox) {
+        Row oldSelection = comboBox.getDataSource().getSelectedRow();
+        String oldValue = null;
+        if (oldSelection != null) {
+            oldValue = oldSelection.getFieldValue("value");
+        }
+        return oldValue;
     }
 
 
@@ -376,12 +416,6 @@ class DefaultQuarantineWindow extends JInternalFrame {
     }
 
 
-    private void updateGuiAfterTransfert(TransferJobRequest.Transfer transfer) {
-        loadRequestTable(transfer);
-        loadFilters();
-    }
-
-
     private class QuarantineRunnable extends SwingRunnable {
         private TransferJobRequest.Transfer transfer;
         private String errorMessage;
@@ -406,7 +440,7 @@ class DefaultQuarantineWindow extends JInternalFrame {
 
         @Override
         public void updateGui() {
-            updateGuiAfterTransfert(transfer);
+            loadRequestTable(transfer);
         }
     }
 
@@ -418,7 +452,7 @@ class DefaultQuarantineWindow extends JInternalFrame {
 
         @Override
         protected void preSearch(FieldsList selector) throws RequestException {
-            for (Iterator<String> it = allFieldsSelector.fieldNames(); it.hasNext();) {
+            for (Iterator<String> it = allFieldsSelector.fieldNames(); it.hasNext(); ) {
                 String column = it.next();
                 if (!selector.contains(column)) {
                     selector.addField(column, TOUT);
@@ -460,7 +494,7 @@ class DefaultQuarantineWindow extends JInternalFrame {
                     public void run() {
                         try {
                             proceedTransfert(TransferJobRequest.Transfer.USER_TO_QUARANTINE);
-                            updateGuiAfterTransfert(TransferJobRequest.Transfer.USER_TO_QUARANTINE);
+                            loadRequestTable(TransferJobRequest.Transfer.USER_TO_QUARANTINE);
                         }
                         catch (Exception ex) {
                             ErrorDialog.show(DefaultQuarantineWindow.this, USER_TO_QUARANTINE, ex);
