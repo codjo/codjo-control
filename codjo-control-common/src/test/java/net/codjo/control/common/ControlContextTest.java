@@ -4,8 +4,9 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.common;
-import net.codjo.test.common.mock.ConnectionMock;
+import java.sql.Connection;
 import junit.framework.TestCase;
+import net.codjo.test.common.mock.ConnectionMock;
 /**
  */
 public class ControlContextTest extends TestCase {
@@ -30,7 +31,7 @@ public class ControlContextTest extends TestCase {
 
     public void test_connection() throws Exception {
         ControlContext controlContext = new ControlContext();
-        ConnectionMock connectionMock = new ConnectionMock();
+        Connection connectionMock = new ConnectionMock().getStub();
         controlContext.setConnection(connectionMock);
         assertSame(connectionMock, controlContext.getConnection());
     }

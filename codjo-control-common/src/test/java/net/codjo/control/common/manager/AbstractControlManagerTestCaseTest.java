@@ -45,7 +45,7 @@ public class AbstractControlManagerTestCaseTest extends AbstractControlManagerTe
         @Override
         protected Connection getConnection() throws SQLException, NamingException {
             log.call("getConnection");
-            return new ConnectionMock();
+            return new ConnectionMock().getStub();
         }
 
 

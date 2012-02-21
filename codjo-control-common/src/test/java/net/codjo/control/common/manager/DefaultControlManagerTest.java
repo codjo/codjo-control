@@ -42,7 +42,7 @@ public class DefaultControlManagerTest extends AbstractControlManagerTestCase {
         userId = UserId.createId(USER_LOGIN, USER_LOGIN);
 
         connectionPool = new ConnectionPoolMock(new LogString("connectionPool", log));
-        connection = new ConnectionMock();
+        connection = new ConnectionMock().getStub();
         connectionPool.mockGetConnection(connection);
     }
 }

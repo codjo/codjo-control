@@ -56,7 +56,7 @@ public class ImmutableControlContextTest extends TestCase {
         }
 
         try {
-            immutable.setConnection(new ConnectionMock());
+            immutable.setConnection(new ConnectionMock().getStub());
             fail("Methode immutable");
         }
         catch (UnsupportedOperationException ex) {

@@ -21,7 +21,7 @@ public class QuarantineControlManagerTest extends TestCase {
     private static final String QUARANTINE_TABLE = "Q_VL";
     private JdbcFixture jdbc;
     private LogString log = new LogString();
-    private Connection connection = new ConnectionMock();
+    private Connection connection = new ConnectionMock().getStub();
     private QuarantineControlManager controlManager;
     private IntegrationPlanMock planMock;
     private AspectManager manager;
@@ -124,7 +124,7 @@ public class QuarantineControlManagerTest extends TestCase {
         // Verification du contexte
         ControlAspectContext context = new ControlAspectContext(FakeBeforeAspect.aspectCtxt);
         assertNotNull(FakeBeforeAspect.aspectCtxt);
-        assertEquals(connection, context.getConnection());
+        assertSame(connection, context.getConnection());
         assertEquals("user", context.getUser());
         assertEquals(CONTROL_TABLE, context.getControlTableName());
         assertEquals("myCurrentRequestId", context.getJobRequestId());
@@ -222,7 +222,7 @@ public class QuarantineControlManagerTest extends TestCase {
         @Override
         public void executeDispatch(Connection connection, ControlContext context) throws SQLException {
             log.call("executeDispatch");
-            if (connection instanceof ConnectionMock) {
+            if (QuarantineControlManagerTest.this.connection == connection) {
                 return;
             }
             // NB :  HSQLDB ne supporte pas les requetes "update ... from ... inner"
