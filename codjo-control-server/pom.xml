@@ -56,7 +56,8 @@
         </dependency>
         <dependency>
             <groupId>net.codjo.database</groupId>
-            <artifactId>codjo-database-main</artifactId>
+            <artifactId>codjo-database-${databaseType}</artifactId>
+            <optional>true</optional>
             <scope>test</scope>
         </dependency>
         <dependency>
