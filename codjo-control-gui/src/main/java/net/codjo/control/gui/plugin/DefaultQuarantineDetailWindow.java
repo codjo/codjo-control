@@ -4,23 +4,6 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.gui.plugin;
-import net.codjo.control.gui.data.DetailData;
-import net.codjo.control.gui.data.QuarantineGuiData;
-import net.codjo.control.gui.data.TabData;
-import net.codjo.control.gui.util.QuarantineUtil;
-import net.codjo.gui.toolkit.LabelledItemPanel;
-import net.codjo.gui.toolkit.util.ErrorDialog;
-import net.codjo.mad.client.request.RequestException;
-import net.codjo.mad.common.structure.FieldStructure;
-import net.codjo.mad.common.structure.StructureReader;
-import net.codjo.mad.common.structure.TableStructure;
-import net.codjo.mad.gui.framework.GuiContext;
-import net.codjo.mad.gui.request.DetailDataSource;
-import net.codjo.mad.gui.request.event.DataSourceAdapter;
-import net.codjo.mad.gui.request.event.DataSourceEvent;
-import net.codjo.mad.gui.request.util.ButtonPanelLogic;
-import net.codjo.mad.gui.request.wrapper.GuiWrapper;
-import net.codjo.mad.gui.structure.StructureCache;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -37,19 +20,38 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.text.JTextComponent;
-/**
- * Description of the Class
- *
- * @author $Author: palmont $
- * @version $Revision: 1.8 $
- */
-public class DefaultQuarantineDetailWindow extends JInternalFrame {
+import net.codjo.control.gui.data.DetailData;
+import net.codjo.control.gui.data.QuarantineGuiData;
+import net.codjo.control.gui.data.TabData;
+import net.codjo.control.gui.util.QuarantineUtil;
+import net.codjo.gui.toolkit.LabelledItemPanel;
+import net.codjo.gui.toolkit.util.ErrorDialog;
+import net.codjo.i18n.common.TranslationManager;
+import net.codjo.i18n.gui.InternationalizableContainer;
+import net.codjo.i18n.gui.TranslationNotifier;
+import net.codjo.mad.client.request.RequestException;
+import net.codjo.mad.common.structure.StructureReader;
+import net.codjo.mad.common.structure.TableStructure;
+import net.codjo.mad.gui.framework.GuiContext;
+import net.codjo.mad.gui.i18n.InternationalizationUtil;
+import net.codjo.mad.gui.request.DetailDataSource;
+import net.codjo.mad.gui.request.event.DataSourceAdapter;
+import net.codjo.mad.gui.request.event.DataSourceEvent;
+import net.codjo.mad.gui.request.util.ButtonPanelLogic;
+import net.codjo.mad.gui.request.wrapper.GuiWrapper;
+import net.codjo.mad.gui.structure.StructureCache;
+
+import static net.codjo.control.gui.i18n.InternationalizationUtil.QUARANTINE_DETAIL_TITLE;
+
+public class DefaultQuarantineDetailWindow extends JInternalFrame implements InternationalizableContainer {
     private static final String ERROR_TYPE = "errorType";
     private static final String ERROR_LOG = "errorLog";
+    private TranslationManager translationManager;
+    private TranslationNotifier translationNotifier;
     private ButtonPanelLogic buttonPanelLogic = new ButtonPanelLogic();
     private LabelledItemPanel currentMainPanel = null;
     private int fieldsCount = 0;
-    private JButton forceButton = new JButton("Forcer");
+    private JButton forceButton = new JButton();
     private List<LabelledItemPanel> mainPanelList = new ArrayList<LabelledItemPanel>();
     private JTabbedPane mainTabbedPane = new JTabbedPane();
     protected DetailDataSource dataSource;
@@ -60,15 +62,20 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame {
     public DefaultQuarantineDetailWindow(DetailDataSource dataSource)
           throws RequestException {
         super("", true, true, true, true);
-        this.guiData =
-              (QuarantineGuiData)dataSource.getGuiContext()
-                    .getProperty(DefaultQuarantineWindow.QUARANTINE_GUI_DATA);
+
+        GuiContext guiContext = dataSource.getGuiContext();
+        translationNotifier = InternationalizationUtil.retrieveTranslationNotifier(guiContext);
+        translationManager = InternationalizationUtil.retrieveTranslationManager(guiContext);
+
+        this.guiData = (QuarantineGuiData)guiContext.getProperty(DefaultQuarantineWindow.QUARANTINE_GUI_DATA);
         this.dataSource = dataSource;
         this.mainTabbedPane.setName("TabbedPane");
 
         final DetailData detailData = guiData.getDetail();
         this.setTitle(detailData.getTitle());
         this.setPreferredSize(new Dimension(detailData.getWindowWidth(), detailData.getWindowHeight()));
+
+        translationNotifier.addInternationalizableContainer(this);
 
         declareFields(dataSource);
         declareErrorFields();
@@ -117,22 +124,13 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame {
     }
 
 
-    /**
-     * Declaration des champs quarantine.
-     *
-     * @param detailDataSource
-     *
-     * @throws RequestException
-     */
     protected void declareFields(DetailDataSource detailDataSource)
           throws RequestException {
         StructureReader reader = getStructureReader(detailDataSource.getGuiContext());
         if (guiData.getDetail().getFields() != null) {
             for (String name : guiData.getDetail().getFields()) {
                 if (!ERROR_LOG.equals(name) && !ERROR_TYPE.equals(name)) {
-                    addField(detailDataSource, name,
-                             reader.getTableBySqlName(guiData.getQuarantine())
-                                   .getFieldByJava(name).getLabel(), new JTextField(), null);
+                    addDeclaredField(detailDataSource, reader, name, null);
                 }
             }
         }
@@ -141,16 +139,36 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame {
             for (TabData tabData : guiData.getDetail().getTabs()) {
                 for (String name : tabData.getFields()) {
                     if (!ERROR_LOG.equals(name) && !ERROR_TYPE.equals(name)) {
-                        TableStructure tableBySqlName =
-                              reader.getTableBySqlName(guiData.getQuarantine());
-                        FieldStructure fieldByJava = tableBySqlName.getFieldByJava(name);
-                        String label = fieldByJava.getLabel();
-                        addField(detailDataSource, name, label, new JTextField(),
-                                 tabData.getTitle());
+                        addDeclaredField(detailDataSource, reader, name, tabData.getTitle());
                     }
                 }
             }
         }
+    }
+
+
+    private void addDeclaredField(DetailDataSource detailDataSource, StructureReader reader,
+                                  String fieldName, String tabName) {
+        TableStructure tableBySqlName = reader.getTableBySqlName(guiData.getQuarantine());
+        String label = tableBySqlName.getFieldByJava(fieldName).getLabel();
+        String entityName = tableBySqlName.getJavaName();
+        addField(detailDataSource, fieldName, getTranslation(entityName, label), new JTextField(), tabName);
+    }
+
+
+    public void addInternationalizableComponents(TranslationNotifier notifier) {
+        if (guiData.getDetail().getTitle().startsWith(QUARANTINE_DETAIL_TITLE)) {
+            notifier.addInternationalizableComponent(this, guiData.getDetail().getTitle());
+        }
+        notifier.addInternationalizableComponent(forceButton, "DefaultQuarantineWindow.sendButton", null);
+    }
+
+
+    private String getTranslation(String prefix, String key) {
+        if (key.startsWith(prefix)) {
+            return translationManager.translate(key, translationNotifier.getLanguage());
+        }
+        return key;
     }
 
 
@@ -169,11 +187,11 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame {
     }
 
 
-    protected void addField(DetailDataSource detailDataSource, String fieldName,
-                            String label, JComponent comp, String tabName) {
+    protected void addField(DetailDataSource detailDataSource, String fieldName, String label,
+                            JComponent comp, String tabName) {
+        comp.setName(this.getTitle() + "_" + label);
         addBasicField(label, comp, tabName);
         detailDataSource.declare(fieldName, comp);
-        comp.setName(this.getTitle() + "_" + label);
     }
 
 
@@ -200,7 +218,9 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame {
         fieldsCount = 0;
         currentMainPanel = new LabelledItemPanel();
         mainPanelList.add(currentMainPanel);
-        currentMainPanel.setName("Page " + mainPanelList.size());
+        currentMainPanel.setName(translationManager.translate(
+              "DefaultQuarantineDetailWindow.tabLabel",
+              translationNotifier.getLanguage()) + mainPanelList.size());
     }
 
 
@@ -261,7 +281,12 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame {
         JTextArea jta = new JTextArea();
         jta.setRows(5);
         jta.setEditable(false);
-        addField(this.dataSource, ERROR_LOG, "Erreur", jta, null);
+        addField(this.dataSource,
+                 ERROR_LOG,
+                 translationManager.translate("DefaultQuarantineDetailWindow.errorLog",
+                                              translationNotifier.getLanguage()),
+                 jta,
+                 null);
         dataSource.declare(ERROR_TYPE, new JTextField());
     }
 

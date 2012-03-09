@@ -8,7 +8,11 @@ import net.codjo.agent.UserId;
 import net.codjo.agent.test.Semaphore;
 import net.codjo.control.gui.ControlGuiContext;
 import net.codjo.control.gui.data.QuarantineGuiData;
+import net.codjo.control.gui.i18n.InternationalizationUtil;
 import net.codjo.control.gui.util.QuarantineUtil;
+import net.codjo.i18n.common.Language;
+import net.codjo.i18n.common.TranslationManager;
+import net.codjo.i18n.gui.TranslationNotifier;
 import net.codjo.mad.client.plugin.MadConnectionOperations;
 import net.codjo.mad.client.request.Field;
 import net.codjo.mad.client.request.FieldsList;
@@ -37,6 +41,8 @@ import org.uispec4j.UISpecTestCase;
 import org.uispec4j.Window;
 import org.xml.sax.InputSource;
 
+import static net.codjo.mad.gui.i18n.InternationalizationUtil.*;
+
 public class DefaultQuarantineWindowTest extends UISpecTestCase {
     private static final String PREFERENCES =
           "<?xml version=\"1.0\"?>                                             "
@@ -59,6 +65,8 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
     private QuarantineManager manager;
     private ControlGuiContext guiContext;
     private UserId userId;
+    private TranslationNotifier translationNotifier;
+    private TranslationManager translationManager;
 
 
     @Override
@@ -68,6 +76,8 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
         manager = new QuarantineManager(QuarantineManager.class.getResource("QuarantineGuiTest.xml"), userId);
         PreferenceFactory.loadMapping(new InputSource(new StringReader(PREFERENCES)));
         guiContext = new ControlGuiContext();
+        translationNotifier = retrieveTranslationNotifier(guiContext);
+        translationManager = retrieveTranslationManager(guiContext);
         guiContext.setSender(new Sender(new MadOperationsMock()));
         guiContext.putProperty(GuiPlugin.AGENT_CONTAINER_KEY, new AgentContainerMock(new LogString()));
         UserMock userMock = new UserMock();
@@ -137,6 +147,11 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
     public void test_dbFilters_selectorUpdate() throws Exception {
         ComboBox testUserCombo = new ComboBox(userCombo);
         testUserCombo.select("joe bloggs 2");
+        assertTrue(testUserCombo.contentEquals(new String[]{"Tout", "joe bloggs", "joe bloggs 2"}));
+
+        translationNotifier.setLanguage(Language.EN);
+
+        assertTrue(testUserCombo.contentEquals(new String[]{"All", "joe bloggs", "joe bloggs 2"}));
 
         RequestTable requestTable = (RequestTable)window.getTable().getJTable();
         ListDataSource dataSource = requestTable.getDataSource();

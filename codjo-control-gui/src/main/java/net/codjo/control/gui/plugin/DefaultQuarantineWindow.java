@@ -1,6 +1,7 @@
 package net.codjo.control.gui.plugin;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,9 +13,11 @@ import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
@@ -35,6 +38,9 @@ import net.codjo.gui.toolkit.table.TableFilter;
 import net.codjo.gui.toolkit.table.TableFilterCombo;
 import net.codjo.gui.toolkit.util.ErrorDialog;
 import net.codjo.gui.toolkit.waiting.WaitingPanel;
+import net.codjo.i18n.common.TranslationManager;
+import net.codjo.i18n.gui.InternationalizableContainer;
+import net.codjo.i18n.gui.TranslationNotifier;
 import net.codjo.mad.client.request.FieldsList;
 import net.codjo.mad.client.request.RequestException;
 import net.codjo.mad.client.request.Result;
@@ -48,6 +54,7 @@ import net.codjo.mad.gui.framework.FilterPanel;
 import net.codjo.mad.gui.framework.GuiContext;
 import net.codjo.mad.gui.framework.LocalGuiContext;
 import net.codjo.mad.gui.framework.SwingRunnable;
+import net.codjo.mad.gui.i18n.InternationalizationUtil;
 import net.codjo.mad.gui.request.ListDataSource;
 import net.codjo.mad.gui.request.PreferenceFactory;
 import net.codjo.mad.gui.request.RequestComboBox;
@@ -61,11 +68,18 @@ import net.codjo.mad.gui.structure.StructureCache;
 import net.codjo.util.string.StringUtil;
 import net.codjo.workflow.common.schedule.ScheduleLauncher;
 
-class DefaultQuarantineWindow extends JInternalFrame {
-    private static final String QUARANTINE_TO_USER = "Erreur lors du transfert de quarantaine vers user";
-    private static final String USER_TO_QUARANTINE = "Erreur lors du transfert de user vers quarantaine";
+import static net.codjo.control.gui.i18n.InternationalizationUtil.QUARANTINE_WINDOW_TITLE;
+
+class DefaultQuarantineWindow extends JInternalFrame implements InternationalizableContainer {
+    private static final String QUARANTINE_TO_USER
+          = "DefaultQuarantineWindow.transfertUser";
+    private static final String USER_TO_QUARANTINE
+          = "DefaultQuarantineWindow.transfertQuarantine";
     public static final String QUARANTINE_GUI_DATA = "QuarantineGuiData";
     private static final String TOUT = "Tout";
+
+    private TranslationManager translationManager;
+    private TranslationNotifier translationNotifier;
 
     private QuarantineGuiData guiData;
     private final UserId userId;
@@ -76,7 +90,8 @@ class DefaultQuarantineWindow extends JInternalFrame {
     private RequestToolBar toolBar;
     private ProgressBarLabel progressBarLabel;
     protected FieldsList allFieldsSelector;
-    private WaitingPanel waitingPanel = new WaitingPanel("Traitements en cours ...");
+    private WaitingPanel waitingPanel;
+    private JButton sendButton;
 
 
     DefaultQuarantineWindow(GuiContext context,
@@ -89,22 +104,24 @@ class DefaultQuarantineWindow extends JInternalFrame {
         this.setIconifiable(true);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(400, 200));
-
+        translationNotifier = InternationalizationUtil.retrieveTranslationNotifier(context);
+        translationManager = InternationalizationUtil.retrieveTranslationManager(context);
         this.guiData = guiData;
         this.userId = userId;
         this.progressBarLabel = new ProgressBarLabel();
         this.allFieldsSelector = new FieldsList();
-
         initRequestTable(mainDataSource);
         initLayout();
         initGuiContext(context);
         initToolbar();
         initFilters();
         initDbFilters();
-
-        guiContext.executeTask(new QuarantineRunnable("Chargement",
+        translationNotifier.addInternationalizableContainer(this);
+        guiContext.executeTask(new QuarantineRunnable(translationManager.translate(
+              "DefaultQuarantineWindow.lineUpload", translationNotifier.getLanguage()),
                                                       TransferJobRequest.Transfer.QUARANTINE_TO_USER,
-                                                      QUARANTINE_TO_USER));
+                                                      translationManager.translate(QUARANTINE_TO_USER,
+                                                                                   translationNotifier.getLanguage())));
     }
 
 
@@ -124,6 +141,9 @@ class DefaultQuarantineWindow extends JInternalFrame {
 
 
     private void initLayout() {
+        waitingPanel = new WaitingPanel(translationManager.translate(
+              "DefaultQuarantineWindow.waitingPanel", translationNotifier.getLanguage()));
+
         setGlassPane(waitingPanel);
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.getViewport().add(requestTable, null);
@@ -139,7 +159,9 @@ class DefaultQuarantineWindow extends JInternalFrame {
         filterPanel.setWithSearchButton(false);
         filterPanel.setPostponedLoad(true);
         filterPanel.setBorder(new TitledBorder(
-              new EtchedBorder(EtchedBorder.RAISED, Color.white, new Color(134, 134, 134)), "Filtres"));
+              new EtchedBorder(EtchedBorder.RAISED, Color.white, new Color(134, 134, 134)),
+              translationManager.translate("DefaultQuarantineWindow.filterPanel.title",
+                                           translationNotifier.getLanguage())));
 
         this.getContentPane().setLayout(new BorderLayout());
         this.getContentPane().add(mainPanel, BorderLayout.CENTER);
@@ -148,6 +170,14 @@ class DefaultQuarantineWindow extends JInternalFrame {
 
         final WindowData window = guiData.getWindow();
         setPreferredSize(new Dimension(window.getWindowWidth(), window.getWindowHeight()));
+    }
+
+
+    public void addInternationalizableComponents(TranslationNotifier notifier) {
+        if (guiData.getWindow().getTitle().startsWith(QUARANTINE_WINDOW_TITLE)) {
+            notifier.addInternationalizableComponent(this, guiData.getWindow().getTitle());
+        }
+        notifier.addInternationalizableComponent(sendButton, "DefaultQuarantineWindow.sendButton", null);
     }
 
 
@@ -190,7 +220,7 @@ class DefaultQuarantineWindow extends JInternalFrame {
         validationButton.setName(QuarantineUtil.QUARANTINE_OK_BUTTON_NAME);
         toolBar.addSeparator();
 
-        JButton sendButton = new JButton("Envoyer");
+        sendButton = new JButton();
         sendButton.setName(QuarantineUtil.QUANRANTINE_SEND_BUTTON_NAME);
         toolBar.add(sendButton);
 
@@ -304,7 +334,10 @@ class DefaultQuarantineWindow extends JInternalFrame {
             }
         }
         catch (RequestException exception) {
-            ErrorDialog.show(this, "Erreur lors du chargement des filtres DB.", exception);
+            String message = translationManager.translate(
+                  "DefaultQuarantineWindow.errorFilter",
+                  translationNotifier.getLanguage());
+            ErrorDialog.show(this, message, exception);
         }
     }
 
@@ -328,6 +361,26 @@ class DefaultQuarantineWindow extends JInternalFrame {
         rows.add(0, newRow);
         loadResult.setRows(rows);
         comboBox.getDataSource().setLoadResult(loadResult);
+        ListCellRenderer actualRenderer = comboBox.getRenderer();
+        if (actualRenderer == null) {
+            comboBox.setRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList list,
+                                                              Object value,
+                                                              int index,
+                                                              boolean isSelected,
+                                                              boolean cellHasFocus) {
+                    if (TOUT.equals(value)) {
+                        value = translationManager.translate("DefaultQuarantineWindow.filterComboBox.all",
+                                                             translationNotifier.getLanguage());
+                    }
+                    return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                }
+            });
+        }
+        else {
+            comboBox.setRenderer(new TranslationRenderer(actualRenderer));
+        }
     }
 
 
@@ -354,7 +407,9 @@ class DefaultQuarantineWindow extends JInternalFrame {
             toolBar.setLeftComponent(field);
         }
         catch (RequestException ex) {
-            ErrorDialog.show(this, "Chargement de la table en erreur !", ex);
+            String message = translationManager.translate(
+                  "DefaultQuarantineWindow.errorTable", translationNotifier.getLanguage());
+            ErrorDialog.show(this, message, ex);
         }
     }
 
@@ -389,7 +444,9 @@ class DefaultQuarantineWindow extends JInternalFrame {
                 }
             }
             catch (RequestException exception) {
-                ErrorDialog.show(this, "Chargement des noms des colonnes en erreur !", exception);
+                String message = translationManager.translate("DefaultQuarantineWindow.errorColumn",
+                                                              translationNotifier.getLanguage());
+                ErrorDialog.show(this, message, exception);
             }
         }
     }
@@ -422,7 +479,7 @@ class DefaultQuarantineWindow extends JInternalFrame {
 
 
         QuarantineRunnable(String title, TransferJobRequest.Transfer transfer, String errorMessage) {
-            super(title + " des lignes en cours...");
+            super(title);
             this.transfer = transfer;
             this.errorMessage = errorMessage;
         }
@@ -497,16 +554,45 @@ class DefaultQuarantineWindow extends JInternalFrame {
                             loadRequestTable(TransferJobRequest.Transfer.USER_TO_QUARANTINE);
                         }
                         catch (Exception ex) {
-                            ErrorDialog.show(DefaultQuarantineWindow.this, USER_TO_QUARANTINE, ex);
+                            ErrorDialog.show(DefaultQuarantineWindow.this,
+                                             translationManager.translate(USER_TO_QUARANTINE,
+                                                                          translationNotifier.getLanguage()),
+                                             ex);
                         }
                     }
                 });
             }
             else {
-                guiContext.executeTask(new QuarantineRunnable("Traitement",
+                guiContext.executeTask(new QuarantineRunnable(translationManager.translate(
+                      "DefaultQuarantineWindow.lineProcessing",
+                      translationNotifier.getLanguage()),
                                                               TransferJobRequest.Transfer.USER_TO_QUARANTINE,
-                                                              USER_TO_QUARANTINE));
+                                                              translationManager.translate(USER_TO_QUARANTINE,
+                                                                                           translationNotifier.getLanguage())));
             }
+        }
+    }
+
+    private class TranslationRenderer implements ListCellRenderer {
+
+        private ListCellRenderer actualRenderer;
+
+
+        private TranslationRenderer(ListCellRenderer actualRenderer) {
+            this.actualRenderer = actualRenderer;
+        }
+
+
+        public Component getListCellRendererComponent(JList list,
+                                                      Object value,
+                                                      int index,
+                                                      boolean isSelected,
+                                                      boolean cellHasFocus) {
+            if (TOUT.equals(value)) {
+                value = translationManager.translate("DefaultQuarantineWindow.filterComboBox.all",
+                                                     translationNotifier.getLanguage());
+            }
+            return actualRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         }
     }
 }

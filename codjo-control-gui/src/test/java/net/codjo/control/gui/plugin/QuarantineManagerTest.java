@@ -4,24 +4,26 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.gui.plugin;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.ListResourceBundle;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import junit.framework.TestCase;
 import net.codjo.agent.UserId;
+import net.codjo.control.gui.ControlGuiContext;
 import net.codjo.control.gui.data.DbFilterData;
 import net.codjo.control.gui.data.DetailData;
 import net.codjo.control.gui.data.QuarantineGuiData;
 import net.codjo.control.gui.data.TabData;
 import net.codjo.control.gui.data.WindowData;
+import net.codjo.i18n.common.TranslationManager;
 import net.codjo.mad.client.plugin.MadConnectionPluginMock;
 import net.codjo.mad.gui.base.GuiConfigurationMock;
-import net.codjo.mad.gui.framework.DefaultGuiContext;
 import net.codjo.mad.gui.framework.LocalGuiContext;
 import net.codjo.security.common.api.UserMock;
 import net.codjo.workflow.common.schedule.WorkflowConfiguration;
 import net.codjo.workflow.gui.plugin.WorkflowGuiPlugin;
-import java.util.Collection;
-import java.util.Iterator;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import junit.framework.TestCase;
 
 public class QuarantineManagerTest extends TestCase {
     private QuarantineManager manager;
@@ -39,7 +41,6 @@ public class QuarantineManagerTest extends TestCase {
 
 
     public void test_guiData() throws Exception {
-
         Collection<QuarantineGuiData> dataList = manager.getList().getDataList();
         assertEquals(4, dataList.size());
 
@@ -109,7 +110,7 @@ public class QuarantineManagerTest extends TestCase {
                                         userId,
                                         workflowConfiguration);
 
-        DefaultGuiContext defaultGuiContext = new DefaultGuiContext();
+        ControlGuiContext defaultGuiContext = new ControlGuiContext();
         defaultGuiContext.setUser(new UserMock().mockIsAllowedTo(true));
 
         LocalGuiContext guiCtxt = new LocalGuiContext(defaultGuiContext);

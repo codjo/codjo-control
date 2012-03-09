@@ -4,20 +4,21 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.gui.plugin;
-import net.codjo.agent.UserId;
-import net.codjo.control.gui.data.QuarantineGuiData;
-import net.codjo.gui.toolkit.util.ErrorDialog;
-import net.codjo.mad.gui.framework.AbstractGuiAction;
-import net.codjo.mad.gui.framework.GuiContext;
-import net.codjo.mad.gui.request.ListDataSource;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyVetoException;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-/**
- *
- */
+import net.codjo.agent.UserId;
+import net.codjo.control.gui.data.QuarantineGuiData;
+import net.codjo.gui.toolkit.util.ErrorDialog;
+import net.codjo.i18n.common.TranslationManager;
+import net.codjo.i18n.gui.TranslationNotifier;
+import net.codjo.mad.gui.framework.AbstractGuiAction;
+import net.codjo.mad.gui.framework.GuiContext;
+import net.codjo.mad.gui.i18n.InternationalizationUtil;
+import net.codjo.mad.gui.request.ListDataSource;
+
 class DefaultQuarantineAction extends AbstractGuiAction {
     private CleanUpListener cleanUpListener = new CleanUpListener();
     private JInternalFrame frame;

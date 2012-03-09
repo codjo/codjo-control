@@ -10,7 +10,7 @@
             <filter>portfolioCode</filter>
         </window>
 
-        <detail title="Quarantaine des bench" nbFieldsByPage="5" windowWidth="800" windowHeight="600">
+        <detail title="quarantine.detail.title.Benchmark" nbFieldsByPage="5" windowWidth="800" windowHeight="600">
             <field>portfolioCode</field>
             <field>benchCode</field>
         </detail>

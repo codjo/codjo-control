@@ -4,11 +4,6 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.gui.system;
-import net.codjo.gui.toolkit.swing.GenericRenderer;
-import net.codjo.mad.client.request.RequestException;
-import net.codjo.mad.gui.framework.GuiContext;
-import net.codjo.mad.gui.request.RequestTable;
-import net.codjo.mad.gui.request.RequestToolBar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -24,21 +19,30 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.UIManager;
-/**
- * Ecran de saisie des systèmes sources.
- *
- * @author $Author: torrent $
- * @version $Revision: 1.7 $
- */
-class SourceSystemWindow extends JInternalFrame {
+import net.codjo.gui.toolkit.swing.GenericRenderer;
+import net.codjo.i18n.common.TranslationManager;
+import net.codjo.i18n.gui.InternationalizableContainer;
+import net.codjo.i18n.gui.TranslationNotifier;
+import net.codjo.mad.client.request.RequestException;
+import net.codjo.mad.gui.framework.GuiContext;
+import net.codjo.mad.gui.i18n.InternationalizableRequestTable;
+import net.codjo.mad.gui.i18n.InternationalizationUtil;
+import net.codjo.mad.gui.request.PreferenceFactory;
+import net.codjo.mad.gui.request.RequestTable;
+import net.codjo.mad.gui.request.RequestToolBar;
+
+class SourceSystemWindow extends JInternalFrame implements InternationalizableContainer {
     private JScrollPane scrollPane = new JScrollPane();
     private RequestTable requestTable = new RequestTable();
     private RequestToolBar toolBar = new RequestToolBar();
+    private TranslationManager translationManager;
+    private TranslationNotifier notifier;
 
 
     SourceSystemWindow(GuiContext ctxt) throws RequestException {
         super("Système", true, true, true, true);
         jbInit();
+        initInternationalization(ctxt);
         requestTable.setEditable(true);
         requestTable.setPreference("SourceSystemWindow");
         initDecimalSeparatorStuff();
@@ -51,8 +55,22 @@ class SourceSystemWindow extends JInternalFrame {
     }
 
 
+    private void initInternationalization(GuiContext context) {
+        notifier = InternationalizationUtil.retrieveTranslationNotifier(context);
+        translationManager = InternationalizationUtil.retrieveTranslationManager(context);
+        notifier.addInternationalizableContainer(this);
+    }
+
+
+    public void addInternationalizableComponents(TranslationNotifier translationNotifier) {
+        translationNotifier.addInternationalizableComponent(this, "SourceSystemWindow.title");
+        translationNotifier.addInternationalizableComponent(new InternationalizableRequestTable(PreferenceFactory.getPreference(
+              "SourceSystemWindow"), requestTable));
+    }
+
+
     private void initDateFormatStuff() {
-        Map<String,String> map = new HashMap<String,String>();
+        Map<String, String> map = new HashMap<String, String>();
         map.put("yyyyMM", "période (197303)");
         map.put("dd-MM-yy", "jj-mm-aa (18-03-73)");
         map.put("dd-MM-yyyy", "jj-mm-aaaa (18-03-1973)");
@@ -77,9 +95,13 @@ class SourceSystemWindow extends JInternalFrame {
 
 
     private void initDecimalSeparatorStuff() {
-        Map<String,String> map = new HashMap<String,String>();
-        map.put(".", "Point");
-        map.put(",", "Virgule");
+        Map<String, String> map = new HashMap<String, String>();
+        map.put(".",
+                translationManager.translate("SourceSystemWindow.dot",
+                                             notifier.getLanguage()));
+        map.put(",",
+                translationManager.translate("SourceSystemWindow.comma",
+                                             notifier.getLanguage()));
         GenericRenderer renderer = new GenericRenderer(map);
 
         JComboBox combo = new JComboBox(new String[]{".", ","});
