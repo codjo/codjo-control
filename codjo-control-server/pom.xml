@@ -48,6 +48,7 @@
             <groupId>net.codjo.agent</groupId>
             <artifactId>codjo-agent</artifactId>
             <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.codjo.test</groupId>
@@ -69,17 +70,20 @@
             <groupId>net.codjo.workflow</groupId>
             <artifactId>codjo-workflow-common</artifactId>
             <classifier>tests</classifier>
-        </dependency>
+             <scope>test</scope>
+       </dependency>
         <dependency>
             <groupId>net.codjo.workflow</groupId>
             <artifactId>codjo-workflow-server</artifactId>
             <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.codjo.mad</groupId>
             <artifactId>codjo-mad-server</artifactId>
             <classifier>tests</classifier>
-        </dependency>
+             <scope>test</scope>
+       </dependency>
         <dependency>
             <groupId>net.codjo.sql</groupId>
             <artifactId>codjo-sql-server</artifactId>
