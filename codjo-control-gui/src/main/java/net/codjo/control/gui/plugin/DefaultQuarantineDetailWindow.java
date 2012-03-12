@@ -220,8 +220,8 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
         currentMainPanel = new LabelledItemPanel();
         mainPanelList.add(currentMainPanel);
         currentMainPanel.setName(translationManager.translate(
-              "DefaultQuarantineDetailWindow.tabLabel",
-              translationNotifier.getLanguage()) + mainPanelList.size());
+              "DefaultQuarantineDetailWindow.tabLabel", translationNotifier.getLanguage()) + " "
+                                 + mainPanelList.size());
     }
 
 
