@@ -192,6 +192,7 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
         comp.setName(this.getTitle() + "_" + label);
         addBasicField(label, comp, tabName);
         detailDataSource.declare(fieldName, comp);
+        comp.setName(this.getTitle() + "_" + label);
     }
 
 
