@@ -27,8 +27,10 @@ import net.codjo.mad.common.structure.StructureReader;
 import net.codjo.mad.common.structure.TableStructure;
 import net.codjo.mad.gui.request.DetailDataSource;
 import net.codjo.xml.XmlException;
+import org.uispec4j.Button;
 import org.uispec4j.Panel;
 import org.uispec4j.UISpecTestCase;
+import org.uispec4j.Window;
 import org.xml.sax.SAXException;
 public class DefaultQuarantineDetailWindowTest extends UISpecTestCase {
     private DefaultQuarantineDetailWindow detailWindow;
@@ -72,6 +74,10 @@ public class DefaultQuarantineDetailWindowTest extends UISpecTestCase {
 
     public void test_benchmarkQuarantineDetailWindow() throws Exception {
         detailWindow = new DefaultQuarantineDetailWindow(getDataSource(0));
+
+        Button forceButton = new Window(detailWindow).getButton("Forcer");
+        assertEquals("Forcer", forceButton.getLabel());
+
         assertEquals("Quarantaine des benchs", detailWindow.getTitle());
         JTabbedPane tabbedPane = detailWindow.getMainTabbedPane();
 

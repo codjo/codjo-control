@@ -71,10 +71,8 @@ import net.codjo.workflow.common.schedule.ScheduleLauncher;
 import static net.codjo.control.gui.i18n.InternationalizationUtil.QUARANTINE_WINDOW_TITLE;
 
 class DefaultQuarantineWindow extends JInternalFrame implements InternationalizableContainer {
-    private static final String QUARANTINE_TO_USER
-          = "DefaultQuarantineWindow.transfertUser";
-    private static final String USER_TO_QUARANTINE
-          = "DefaultQuarantineWindow.transfertQuarantine";
+    private static final String QUARANTINE_TO_USER = "DefaultQuarantineWindow.transfertUser";
+    private static final String USER_TO_QUARANTINE = "DefaultQuarantineWindow.transfertQuarantine";
     public static final String QUARANTINE_GUI_DATA = "QuarantineGuiData";
     private static final String TOUT = "Tout";
 
@@ -565,8 +563,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             else {
                 guiContext.executeTask(new QuarantineRunnable(translationManager.translate(
                       "DefaultQuarantineWindow.lineProcessing",
-                      translationNotifier.getLanguage()),
-                                                              TransferJobRequest.Transfer.USER_TO_QUARANTINE,
+                      translationNotifier.getLanguage()), TransferJobRequest.Transfer.USER_TO_QUARANTINE,
                                                               translationManager.translate(USER_TO_QUARANTINE,
                                                                                            translationNotifier.getLanguage())));
             }
