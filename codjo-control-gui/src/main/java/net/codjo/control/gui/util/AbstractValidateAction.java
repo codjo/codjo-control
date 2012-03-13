@@ -4,15 +4,6 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.gui.util;
-import net.codjo.gui.toolkit.util.ErrorDialog;
-import net.codjo.mad.client.request.FieldsList;
-import net.codjo.mad.client.request.RequestException;
-import net.codjo.mad.client.request.Row;
-import net.codjo.mad.gui.framework.AbstractGuiAction;
-import net.codjo.mad.gui.framework.GuiContext;
-import net.codjo.mad.gui.framework.SwingRunnable;
-import net.codjo.mad.gui.request.RequestTable;
-import net.codjo.mad.gui.request.factory.RequestFactory;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,6 +15,17 @@ import java.util.Set;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import net.codjo.gui.toolkit.util.ErrorDialog;
+import net.codjo.mad.client.request.FieldsList;
+import net.codjo.mad.client.request.RequestException;
+import net.codjo.mad.client.request.Row;
+import net.codjo.mad.gui.framework.AbstractGuiAction;
+import net.codjo.mad.gui.framework.GuiContext;
+import net.codjo.mad.gui.framework.SwingRunnable;
+import net.codjo.mad.gui.request.RequestTable;
+import net.codjo.mad.gui.request.factory.RequestFactory;
+
+import static net.codjo.mad.gui.i18n.InternationalizationUtil.translate;
 /**
  * Action permettant un cours ou un Ordre d'eviter ou de bypasser un controle.
  *
@@ -127,7 +129,7 @@ abstract class AbstractValidateAction extends AbstractGuiAction implements Quara
 
     private class ValidorWorker extends SwingRunnable {
         private ValidorWorker() {
-            super("Traitement des lignes en cours...");
+            super(translate("DefaultQuarantineWindow.lineProcessing", getGuiContext()));
         }
 
 

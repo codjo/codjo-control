@@ -15,7 +15,7 @@
                sql="Q_AP_BENCHMARK">
             <field label="Code ptf" name="portfolioCode" sql="PORTFOLIO_CODE"
                    sql-type="VARCHAR"/>
-            <field label="Code bench" name="benchCode" sql="BENCH_CODE"
+            <field label="benchmark.benchCode" name="benchCode" sql="BENCH_CODE"
                    sql-type="VARCHAR"/>
         </table>
         <table type="quarantine" label="Table de quarantaine coupon" name="dividend"
