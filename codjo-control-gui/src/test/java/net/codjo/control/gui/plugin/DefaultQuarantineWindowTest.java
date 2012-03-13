@@ -8,10 +8,8 @@ import net.codjo.agent.UserId;
 import net.codjo.agent.test.Semaphore;
 import net.codjo.control.gui.ControlGuiContext;
 import net.codjo.control.gui.data.QuarantineGuiData;
-import net.codjo.control.gui.i18n.InternationalizationUtil;
 import net.codjo.control.gui.util.QuarantineUtil;
 import net.codjo.i18n.common.Language;
-import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.gui.TranslationNotifier;
 import net.codjo.mad.client.plugin.MadConnectionOperations;
 import net.codjo.mad.client.request.Field;
@@ -41,7 +39,7 @@ import org.uispec4j.UISpecTestCase;
 import org.uispec4j.Window;
 import org.xml.sax.InputSource;
 
-import static net.codjo.mad.gui.i18n.InternationalizationUtil.*;
+import static net.codjo.mad.gui.i18n.InternationalizationUtil.retrieveTranslationNotifier;
 
 public class DefaultQuarantineWindowTest extends UISpecTestCase {
     private static final String PREFERENCES =
@@ -66,7 +64,6 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
     private ControlGuiContext guiContext;
     private UserId userId;
     private TranslationNotifier translationNotifier;
-    private TranslationManager translationManager;
 
 
     @Override
@@ -77,7 +74,6 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
         PreferenceFactory.loadMapping(new InputSource(new StringReader(PREFERENCES)));
         guiContext = new ControlGuiContext();
         translationNotifier = retrieveTranslationNotifier(guiContext);
-        translationManager = retrieveTranslationManager(guiContext);
         guiContext.setSender(new Sender(new MadOperationsMock()));
         guiContext.putProperty(GuiPlugin.AGENT_CONTAINER_KEY, new AgentContainerMock(new LogString()));
         UserMock userMock = new UserMock();

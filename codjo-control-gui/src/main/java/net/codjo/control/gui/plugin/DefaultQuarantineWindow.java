@@ -38,7 +38,6 @@ import net.codjo.gui.toolkit.table.TableFilter;
 import net.codjo.gui.toolkit.table.TableFilterCombo;
 import net.codjo.gui.toolkit.util.ErrorDialog;
 import net.codjo.gui.toolkit.waiting.WaitingPanel;
-import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.gui.InternationalizableContainer;
 import net.codjo.i18n.gui.TranslationNotifier;
 import net.codjo.mad.client.request.FieldsList;
@@ -54,7 +53,6 @@ import net.codjo.mad.gui.framework.FilterPanel;
 import net.codjo.mad.gui.framework.GuiContext;
 import net.codjo.mad.gui.framework.LocalGuiContext;
 import net.codjo.mad.gui.framework.SwingRunnable;
-import net.codjo.mad.gui.i18n.InternationalizationUtil;
 import net.codjo.mad.gui.request.ListDataSource;
 import net.codjo.mad.gui.request.PreferenceFactory;
 import net.codjo.mad.gui.request.RequestComboBox;
@@ -69,15 +67,14 @@ import net.codjo.util.string.StringUtil;
 import net.codjo.workflow.common.schedule.ScheduleLauncher;
 
 import static net.codjo.control.gui.i18n.InternationalizationUtil.QUARANTINE_WINDOW_TITLE;
+import static net.codjo.mad.gui.i18n.InternationalizationUtil.retrieveTranslationNotifier;
+import static net.codjo.mad.gui.i18n.InternationalizationUtil.translate;
 
 class DefaultQuarantineWindow extends JInternalFrame implements InternationalizableContainer {
+    public static final String QUARANTINE_GUI_DATA = "QuarantineGuiData";
     private static final String QUARANTINE_TO_USER = "DefaultQuarantineWindow.transfertUser";
     private static final String USER_TO_QUARANTINE = "DefaultQuarantineWindow.transfertQuarantine";
-    public static final String QUARANTINE_GUI_DATA = "QuarantineGuiData";
     private static final String TOUT = "Tout";
-
-    private TranslationManager translationManager;
-    private TranslationNotifier translationNotifier;
 
     private QuarantineGuiData guiData;
     private final UserId userId;
@@ -90,36 +87,34 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
     protected FieldsList allFieldsSelector;
     private WaitingPanel waitingPanel;
     private JButton sendButton;
+    private JButton validationButton;
+    private JButton forceButton;
 
 
     DefaultQuarantineWindow(GuiContext context,
                             QuarantineGuiData guiData,
                             UserId userId,
-                            ListDataSource mainDataSource)
-          throws Exception {
+                            ListDataSource mainDataSource) throws Exception {
         super(guiData.getWindow().getTitle(), true, true, true, true);
         this.setClosable(true);
         this.setIconifiable(true);
         this.setResizable(true);
         this.setMinimumSize(new Dimension(400, 200));
-        translationNotifier = InternationalizationUtil.retrieveTranslationNotifier(context);
-        translationManager = InternationalizationUtil.retrieveTranslationManager(context);
         this.guiData = guiData;
         this.userId = userId;
         this.progressBarLabel = new ProgressBarLabel();
         this.allFieldsSelector = new FieldsList();
+        initGuiContext(context);
         initRequestTable(mainDataSource);
         initLayout();
-        initGuiContext(context);
         initToolbar();
         initFilters();
         initDbFilters();
+        TranslationNotifier translationNotifier = retrieveTranslationNotifier(context);
         translationNotifier.addInternationalizableContainer(this);
-        guiContext.executeTask(new QuarantineRunnable(translationManager.translate(
-              "DefaultQuarantineWindow.lineUpload", translationNotifier.getLanguage()),
+        guiContext.executeTask(new QuarantineRunnable(translate("DefaultQuarantineWindow.lineUpload", guiContext),
                                                       TransferJobRequest.Transfer.QUARANTINE_TO_USER,
-                                                      translationManager.translate(QUARANTINE_TO_USER,
-                                                                                   translationNotifier.getLanguage())));
+                                                      translate(QUARANTINE_TO_USER, guiContext)));
     }
 
 
@@ -139,8 +134,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
 
 
     private void initLayout() {
-        waitingPanel = new WaitingPanel(translationManager.translate(
-              "DefaultQuarantineWindow.waitingPanel", translationNotifier.getLanguage()));
+        waitingPanel = new WaitingPanel(translate("DefaultQuarantineWindow.waitingPanel", guiContext));
 
         setGlassPane(waitingPanel);
         JScrollPane scrollPane = new JScrollPane();
@@ -158,8 +152,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         filterPanel.setPostponedLoad(true);
         filterPanel.setBorder(new TitledBorder(
               new EtchedBorder(EtchedBorder.RAISED, Color.white, new Color(134, 134, 134)),
-              translationManager.translate("DefaultQuarantineWindow.filterPanel.title",
-                                           translationNotifier.getLanguage())));
+              translate("DefaultQuarantineWindow.filterPanel.title", guiContext)));
 
         this.getContentPane().setLayout(new BorderLayout());
         this.getContentPane().add(mainPanel, BorderLayout.CENTER);
@@ -176,6 +169,8 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             notifier.addInternationalizableComponent(this, guiData.getWindow().getTitle());
         }
         notifier.addInternationalizableComponent(sendButton, "DefaultQuarantineWindow.sendButton", null);
+        notifier.addInternationalizableComponent(forceButton, null, "DefaultQuarantineWindow.forceButton.tooltip");
+        notifier.addInternationalizableComponent(validationButton, null, "DefaultQuarantineWindow.validateButton.tooltip");
     }
 
 
@@ -204,7 +199,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         else {
             forceAction = new ForceAction(guiContext, requestTable);
         }
-        JButton forceButton = toolBar.add(forceAction);
+        forceButton = toolBar.add(forceAction);
         forceButton.setName(QuarantineUtil.QUARANTINE_FORCE_BUTTON_NAME);
 
         ValidationAction validationAction;
@@ -214,7 +209,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         else {
             validationAction = new ValidationAction(guiContext, requestTable);
         }
-        JButton validationButton = toolBar.add(validationAction);
+        validationButton = toolBar.add(validationAction);
         validationButton.setName(QuarantineUtil.QUARANTINE_OK_BUTTON_NAME);
         toolBar.addSeparator();
 
@@ -332,9 +327,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             }
         }
         catch (RequestException exception) {
-            String message = translationManager.translate(
-                  "DefaultQuarantineWindow.errorFilter",
-                  translationNotifier.getLanguage());
+            String message = translate("DefaultQuarantineWindow.errorFilter", guiContext);
             ErrorDialog.show(this, message, exception);
         }
     }
@@ -369,8 +362,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
                                                               boolean isSelected,
                                                               boolean cellHasFocus) {
                     if (TOUT.equals(value)) {
-                        value = translationManager.translate("DefaultQuarantineWindow.filterComboBox.all",
-                                                             translationNotifier.getLanguage());
+                        value = translate("DefaultQuarantineWindow.filterComboBox.all", guiContext);
                     }
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 }
@@ -405,8 +397,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             toolBar.setLeftComponent(field);
         }
         catch (RequestException ex) {
-            String message = translationManager.translate(
-                  "DefaultQuarantineWindow.errorTable", translationNotifier.getLanguage());
+            String message = translate("DefaultQuarantineWindow.errorTable", guiContext);
             ErrorDialog.show(this, message, ex);
         }
     }
@@ -442,8 +433,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
                 }
             }
             catch (RequestException exception) {
-                String message = translationManager.translate("DefaultQuarantineWindow.errorColumn",
-                                                              translationNotifier.getLanguage());
+                String message = translate("DefaultQuarantineWindow.errorColumn", guiContext);
                 ErrorDialog.show(this, message, exception);
             }
         }
@@ -553,19 +543,17 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
                         }
                         catch (Exception ex) {
                             ErrorDialog.show(DefaultQuarantineWindow.this,
-                                             translationManager.translate(USER_TO_QUARANTINE,
-                                                                          translationNotifier.getLanguage()),
+                                             translate(USER_TO_QUARANTINE, guiContext),
                                              ex);
                         }
                     }
                 });
             }
             else {
-                guiContext.executeTask(new QuarantineRunnable(translationManager.translate(
-                      "DefaultQuarantineWindow.lineProcessing",
-                      translationNotifier.getLanguage()), TransferJobRequest.Transfer.USER_TO_QUARANTINE,
-                                                              translationManager.translate(USER_TO_QUARANTINE,
-                                                                                           translationNotifier.getLanguage())));
+                guiContext.executeTask(
+                      new QuarantineRunnable(translate("DefaultQuarantineWindow.lineProcessing", guiContext),
+                                             TransferJobRequest.Transfer.USER_TO_QUARANTINE,
+                                             translate(USER_TO_QUARANTINE, guiContext)));
             }
         }
     }
@@ -586,8 +574,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
                                                       boolean isSelected,
                                                       boolean cellHasFocus) {
             if (TOUT.equals(value)) {
-                value = translationManager.translate("DefaultQuarantineWindow.filterComboBox.all",
-                                                     translationNotifier.getLanguage());
+                value = translate("DefaultQuarantineWindow.filterComboBox.all", guiContext);
             }
             return actualRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         }

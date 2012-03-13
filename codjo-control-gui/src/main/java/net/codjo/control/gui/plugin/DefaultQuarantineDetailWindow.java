@@ -26,14 +26,12 @@ import net.codjo.control.gui.data.TabData;
 import net.codjo.control.gui.util.QuarantineUtil;
 import net.codjo.gui.toolkit.LabelledItemPanel;
 import net.codjo.gui.toolkit.util.ErrorDialog;
-import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.gui.InternationalizableContainer;
 import net.codjo.i18n.gui.TranslationNotifier;
 import net.codjo.mad.client.request.RequestException;
 import net.codjo.mad.common.structure.StructureReader;
 import net.codjo.mad.common.structure.TableStructure;
 import net.codjo.mad.gui.framework.GuiContext;
-import net.codjo.mad.gui.i18n.InternationalizationUtil;
 import net.codjo.mad.gui.request.DetailDataSource;
 import net.codjo.mad.gui.request.event.DataSourceAdapter;
 import net.codjo.mad.gui.request.event.DataSourceEvent;
@@ -42,12 +40,12 @@ import net.codjo.mad.gui.request.wrapper.GuiWrapper;
 import net.codjo.mad.gui.structure.StructureCache;
 
 import static net.codjo.control.gui.i18n.InternationalizationUtil.QUARANTINE_DETAIL_TITLE;
+import static net.codjo.mad.gui.i18n.InternationalizationUtil.retrieveTranslationNotifier;
+import static net.codjo.mad.gui.i18n.InternationalizationUtil.translate;
 
 public class DefaultQuarantineDetailWindow extends JInternalFrame implements InternationalizableContainer {
     private static final String ERROR_TYPE = "errorType";
     private static final String ERROR_LOG = "errorLog";
-    private TranslationManager translationManager;
-    private TranslationNotifier translationNotifier;
     private ButtonPanelLogic buttonPanelLogic = new ButtonPanelLogic();
     private LabelledItemPanel currentMainPanel = null;
     private int fieldsCount = 0;
@@ -57,15 +55,15 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
     protected DetailDataSource dataSource;
     private QuarantineGuiData guiData;
     private boolean isFormClean = false;
+    private GuiContext guiContext;
 
 
     public DefaultQuarantineDetailWindow(DetailDataSource dataSource)
           throws RequestException {
         super("", true, true, true, true);
 
-        GuiContext guiContext = dataSource.getGuiContext();
-        translationNotifier = InternationalizationUtil.retrieveTranslationNotifier(guiContext);
-        translationManager = InternationalizationUtil.retrieveTranslationManager(guiContext);
+        guiContext = dataSource.getGuiContext();
+        TranslationNotifier translationNotifier = retrieveTranslationNotifier(guiContext);
 
         this.guiData = (QuarantineGuiData)guiContext.getProperty(DefaultQuarantineWindow.QUARANTINE_GUI_DATA);
         this.dataSource = dataSource;
@@ -152,7 +150,11 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
         TableStructure tableBySqlName = reader.getTableBySqlName(guiData.getQuarantine());
         String label = tableBySqlName.getFieldByJava(fieldName).getLabel();
         String entityName = tableBySqlName.getJavaName();
-        addField(detailDataSource, fieldName, getTranslation(entityName, label), new JTextField(), tabName);
+        addField(detailDataSource,
+                 fieldName,
+                 getTranslationIfStartsWithPrefix(entityName, label),
+                 new JTextField(),
+                 tabName);
     }
 
 
@@ -164,9 +166,9 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
     }
 
 
-    private String getTranslation(String prefix, String key) {
+    private String getTranslationIfStartsWithPrefix(String prefix, String key) {
         if (key.startsWith(prefix)) {
-            return translationManager.translate(key, translationNotifier.getLanguage());
+            return translate(key, guiContext);
         }
         return key;
     }
@@ -219,9 +221,8 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
         fieldsCount = 0;
         currentMainPanel = new LabelledItemPanel();
         mainPanelList.add(currentMainPanel);
-        currentMainPanel.setName(translationManager.translate(
-              "DefaultQuarantineDetailWindow.tabLabel", translationNotifier.getLanguage()) + " "
-                                 + mainPanelList.size());
+        currentMainPanel.setName(translate("DefaultQuarantineDetailWindow.tabLabel", guiContext)
+                                 + " " + mainPanelList.size());
     }
 
 
@@ -284,8 +285,7 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
         jta.setEditable(false);
         addField(this.dataSource,
                  ERROR_LOG,
-                 translationManager.translate("DefaultQuarantineDetailWindow.errorLog",
-                                              translationNotifier.getLanguage()),
+                 translate("DefaultQuarantineDetailWindow.errorLog", guiContext),
                  jta,
                  null);
         dataSource.declare(ERROR_TYPE, new JTextField());
