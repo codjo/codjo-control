@@ -16,6 +16,8 @@ public class ControlGuiContext extends DefaultGuiContext {
 
         translationManager.addBundle("net.codjo.control.gui.i18n", Language.FR);
         translationManager.addBundle("net.codjo.control.gui.i18n", Language.EN);
+        translationManager.addBundle("net.codjo.control.gui.plugin.i18n", Language.FR);
+        translationManager.addBundle("net.codjo.control.gui.plugin.i18n", Language.EN);
 
         putProperty(TranslationManager.TRANSLATION_MANAGER_PROPERTY, translationManager);
         putProperty(TranslationNotifier.TRANSLATION_NOTIFIER_PROPERTY, translationNotifier);

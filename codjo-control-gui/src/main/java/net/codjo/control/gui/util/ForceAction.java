@@ -15,8 +15,7 @@ import net.codjo.mad.gui.request.RequestTable;
  */
 public class ForceAction extends AbstractValidateAction {
     public ForceAction(GuiContext ctxt, RequestTable table) {
-        super(ctxt, "Forcer", "Force les contrôles des lignes selectionnées", "/images/control.force.gif",
-              table);
+        super(ctxt, "Forcer", "Force les contrôles des lignes selectionnées", "/images/control.force.gif", table);
     }
 
 

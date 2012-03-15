@@ -8,7 +8,7 @@
 
     <parent>
         <groupId>net.codjo.pom</groupId>
-        <artifactId>codjo-pom-library</artifactId>
+        <artifactId>codjo-pom-external</artifactId>
         <version>SNAPSHOT</version>
     </parent>
     <groupId>net.codjo.control</groupId>
@@ -41,8 +41,7 @@
 
     <name>Lib &gt; Control</name>
     <description>
-        Regroupement des diff�rentes librairies permettant de faire
-        des controles de donn�es provenant soit d'un import soit de l'IHM (IHM/NOYAU).
+        Modules for doing data control.
     </description>
     <inceptionYear>2003</inceptionYear>
 
