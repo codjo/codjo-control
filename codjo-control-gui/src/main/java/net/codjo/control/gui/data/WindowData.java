@@ -22,7 +22,6 @@ public class WindowData {
     private String validationAction;
     private String exportAction;
     private String toolbarCustomizer;
-    private boolean syncValidation = false;
 
 
     public String getTitle() {
@@ -133,16 +132,6 @@ public class WindowData {
 
     public String getToolbarCustomizer() {
         return toolbarCustomizer;
-    }
-
-
-    public boolean isSyncValidation() {
-        return syncValidation;
-    }
-
-
-    public void setSyncValidation(boolean syncValidation) {
-        this.syncValidation = syncValidation;
     }
 
 
