@@ -208,8 +208,19 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         Action deleteAction = toolBar.getAction(RequestToolBar.ACTION_DELETE);
         if (deleteAction != null) {
             DeleteControlAction deleteControlAction = new DeleteControlAction(guiContext, requestTable, waitingPanel);
-            deleteControlAction.putValue(Action.NAME, deleteAction.getValue(Action.NAME));
+            /*
+             * The Method replace used below modifies the component name linked to the action.
+             * In order to keep the same name, we retrieve its previous name before replacing.
+             */
+            JButton button = toolBar.getButtonInToolBar(deleteAction);
+            String deleteActionName = null;
+            if(button != null){
+                deleteActionName = button.getName();
+            }
             toolBar.replace(RequestToolBar.ACTION_DELETE, deleteControlAction);
+            if(deleteActionName != null){
+                button.setName(deleteActionName);
+            }
         }
 
         ForceAction forceAction;
