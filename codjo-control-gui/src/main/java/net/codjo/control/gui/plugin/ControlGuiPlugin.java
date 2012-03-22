@@ -35,6 +35,8 @@ public final class ControlGuiPlugin extends AbstractInternationalizableGuiPlugin
 
     @Override
     protected void registerLanguageBundles(TranslationManager translationManager) {
+        translationManager.addBundle("net.codjo.control.common.i18n", Language.FR);
+        translationManager.addBundle("net.codjo.control.common.i18n", Language.EN);
         translationManager.addBundle("net.codjo.control.gui.i18n", Language.FR);
         translationManager.addBundle("net.codjo.control.gui.i18n", Language.EN);
     }

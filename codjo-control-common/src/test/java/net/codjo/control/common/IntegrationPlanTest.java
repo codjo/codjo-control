@@ -4,10 +4,6 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.common;
-import net.codjo.control.common.message.SourceOfData;
-import net.codjo.control.common.util.EntityHelper;
-import net.codjo.control.common.util.EntityIterator;
-import net.codjo.control.common.util.EntityResultState;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,6 +11,11 @@ import java.sql.Timestamp;
 import java.util.Map;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import net.codjo.control.common.i18n.InternationalizationFixture;
+import net.codjo.control.common.message.SourceOfData;
+import net.codjo.control.common.util.EntityHelper;
+import net.codjo.control.common.util.EntityIterator;
+import net.codjo.control.common.util.EntityResultState;
 import org.easymock.MockControl;
 /**
  * DOCUMENT ME!
@@ -23,6 +24,7 @@ import org.easymock.MockControl;
  * @version $Revision: 1.7 $
  */
 public class IntegrationPlanTest extends TestCase {
+    private InternationalizationFixture i18nFixture = new InternationalizationFixture();
     private MockControl connectionControl;
     private Dictionary dico;
     private MockPlan dispatch;
@@ -42,8 +44,6 @@ public class IntegrationPlanTest extends TestCase {
 
     /**
      * Verifie la création de la table temporaire des controles.
-     *
-     * @throws Exception
      */
     public void test_createControlTable() throws Exception {
         mockCreateTemporaryTable();
@@ -93,8 +93,6 @@ public class IntegrationPlanTest extends TestCase {
 
     /**
      * Verifie que le traitement d'un plan Java marche.
-     *
-     * @throws Exception
      */
     public void test_proceedEntity_Java() throws Exception {
         integrationPlan.getPlanList().getPlans().add(planJava);
@@ -116,8 +114,6 @@ public class IntegrationPlanTest extends TestCase {
 
     /**
      * Verifie que le traitement d'un plan Java marche.
-     *
-     * @throws Exception
      */
     public void test_proceedEntity_Java_nostep_for_user()
           throws Exception {
@@ -139,8 +135,6 @@ public class IntegrationPlanTest extends TestCase {
 
     /**
      * Verifie que le traitement passe correctement d'un plan Java a un plan SQL.
-     *
-     * @throws Exception
      */
     public void test_proceedEntity_Java_to_SQL() throws Exception {
         integrationPlan.getPlanList().getPlans().add(planJava);
@@ -166,8 +160,6 @@ public class IntegrationPlanTest extends TestCase {
 
     /**
      * Verifie que le traitement passe correctement d'un plan Java a un plan SQL.
-     *
-     * @throws Exception
      */
     public void test_proceedEntity_SQL_Java() throws Exception {
         integrationPlan.getPlanList().getPlans().add(planSQL);
@@ -195,10 +187,8 @@ public class IntegrationPlanTest extends TestCase {
 
 
     /**
-     * Bug : duplicate key. Si l'integration possede 2 plans SQL, l'objet integrationPlan tente d'inserer 2
-     * fois le bean à controler.
-     *
-     * @throws Exception
+     * Bug : duplicate key. Si l'integration possede 2 plans SQL, l'objet integrationPlan tente d'inserer 2 fois le bean
+     * à controler.
      */
     public void test_proceedEntity_SQL_SQL() throws Exception {
         MockPlan planSQLbis = new MockPlan();
@@ -247,8 +237,6 @@ public class IntegrationPlanTest extends TestCase {
 
     /**
      * Verifie le traitement de la table des Quarantaine en mode java.
-     *
-     * @throws Exception
      */
     public void test_proceedQuarantine_java() throws Exception {
         integrationPlan.getPlanList().getPlans().add(planJava);
@@ -291,8 +279,6 @@ public class IntegrationPlanTest extends TestCase {
 
     /**
      * Verifie le traitement de la table des Quarantaine.
-     *
-     * @throws Exception
      */
     public void test_proceedQuarantine_sql() throws Exception {
         integrationPlan.getPlanList().getPlans().add(planSQL);
@@ -321,7 +307,9 @@ public class IntegrationPlanTest extends TestCase {
      * The JUnit setup method
      */
     @Override
-    protected void setUp() {
+    protected void setUp() throws Exception {
+        i18nFixture.doSetUp();
+
         dico = new Dictionary();
         context = new ControlContext("user", "prevId", SourceOfData.IMPORT);
         planSQL = new MockPlan();
@@ -349,7 +337,8 @@ public class IntegrationPlanTest extends TestCase {
      * The teardown method for JUnit
      */
     @Override
-    protected void tearDown() {
+    protected void tearDown() throws Exception {
+        i18nFixture.doTearDown();
     }
 
 

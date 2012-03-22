@@ -8,6 +8,7 @@ net.codjo.control.server.audit
     -> net.codjo.workflow.common.message
 
 net.codjo.control.server.plugin
+	-> net.codjo.i18n.common.plugin
 	-> net.codjo.agent
 	-> net.codjo.agent.test
 	-> net.codjo.aspect

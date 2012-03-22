@@ -12,6 +12,8 @@ net.codjo.control.server.handler
 	-> net.codjo.util.string
 
 net.codjo.control.server.plugin
+	-> net.codjo.i18n.common
+	-> net.codjo.i18n.common.plugin
 	-> net.codjo.agent
 	-> net.codjo.aspect
 	-> net.codjo.aspect.util

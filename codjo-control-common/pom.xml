@@ -15,6 +15,10 @@
     </parent>
     <dependencies>
         <dependency>
+            <groupId>net.codjo.i18n</groupId>
+            <artifactId>codjo-i18n-common</artifactId>
+        </dependency>
+        <dependency>
             <groupId>net.codjo.agent</groupId>
             <artifactId>codjo-agent</artifactId>
         </dependency>

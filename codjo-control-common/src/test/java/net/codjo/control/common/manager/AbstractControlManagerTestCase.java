@@ -7,7 +7,9 @@ package net.codjo.control.common.manager;
 import net.codjo.control.common.ControlContext;
 import net.codjo.control.common.ControlException;
 import net.codjo.control.common.IntegrationPlan;
+import net.codjo.control.common.i18n.InternationalizationFixture;
 import net.codjo.control.common.loader.ApplicationIP;
+import net.codjo.i18n.common.plugin.InternationalizationPlugin;
 import net.codjo.test.common.LogString;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,6 +19,7 @@ import junit.framework.TestCase;
  * TODO Classe dupliqué de codjo-control (car encore sous maven1) : net.codjo.control.common.manager.AbstractControlManagerTestCase
  */
 public abstract class AbstractControlManagerTestCase extends TestCase {
+    private InternationalizationFixture i18nFixture = new InternationalizationFixture();
     protected static final String USER_LOGIN = "smith";
     protected LogString log = new LogString();
     private ApplicationIPMock applicationIP;
@@ -89,6 +92,7 @@ public abstract class AbstractControlManagerTestCase extends TestCase {
 
     @Override
     protected final void setUp() throws Exception {
+        i18nFixture.doSetUp();
         applicationIP = new ApplicationIPMock(new LogString("applicationIp", log));
         doSetup();
     }
