@@ -214,11 +214,11 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
              */
             JButton button = toolBar.getButtonInToolBar(deleteAction);
             String deleteActionName = null;
-            if(button != null){
+            if (button != null) {
                 deleteActionName = button.getName();
             }
             toolBar.replace(RequestToolBar.ACTION_DELETE, deleteControlAction);
-            if(deleteActionName != null){
+            if (deleteActionName != null) {
                 button.setName(deleteActionName);
             }
         }
@@ -490,7 +490,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
           throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
                  IllegalAccessException, InstantiationException {
         Class actionClass = Class.forName(className);
-        Constructor constructor = actionClass.getConstructor(GuiContext.class, RequestTable.class);
+        Constructor constructor = actionClass.getConstructor(GuiContext.class, RequestTable.class, WaitingPanel.class);
         return constructor.newInstance(guiContext, requestTable, waitingPanel);
     }
 
