@@ -23,6 +23,12 @@
             <artifactId>codjo-control-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.codjo.control</groupId>
+            <artifactId>codjo-control-common</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>net.codjo.util</groupId>
             <artifactId>codjo-util</artifactId>
         </dependency>
