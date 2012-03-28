@@ -88,6 +88,12 @@ public class IntegrationPlanMappingTest extends TestCase {
         Plan plan2 = (Plan)plansListforDel.getPlans().toArray()[0];
         Step step2 = (Step)plan2.getSteps().toArray()[0];
         assertEquals("DeleteControl", step2.getId());
+
+
+        // ################# TEST CLEAN UP TAG ########################
+        String cleanUpType = ctrl.getCleanUpType();
+        assertEquals("delete", cleanUpType);
+
     }
 
 

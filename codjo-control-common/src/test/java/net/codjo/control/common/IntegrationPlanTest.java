@@ -303,6 +303,47 @@ public class IntegrationPlanTest extends TestCase {
     }
 
 
+    public void test_cleanUpType_delete() throws Exception {
+        integrationPlan.setCleanUpType("delete");
+        integrationPlan.getPlanList().getPlans().add(planSQL);
+        mockCreateTemporaryTable();
+        mockDeleteTemporaryTable();
+        activateMock();
+        dico.setNow(Timestamp.valueOf("1999-12-10 10:00:00.0"));
+        integrationPlan.proceedNewEntity(mockConnection, new Object(), context);
+        verifyMock();
+    }
+
+
+    public void test_cleanUpType_drop() throws Exception {
+        integrationPlan.setCleanUpType("drop");
+        integrationPlan.getPlanList().getPlans().add(planSQL);
+        mockCreateTemporaryTable();
+        mockDropTemporaryTable();
+        activateMock();
+        dico.setNow(Timestamp.valueOf("1999-12-10 10:00:00.0"));
+        integrationPlan.proceedNewEntity(mockConnection, new Object(), context);
+        verifyMock();
+    }
+
+
+    public void test_cleanUpType_unknown() throws Exception {
+        integrationPlan.setCleanUpType("unknown");
+        integrationPlan.getPlanList().getPlans().add(planSQL);
+        mockCreateTemporaryTable();
+        mockDeleteTemporaryTable();
+        activateMock();
+        dico.setNow(Timestamp.valueOf("1999-12-10 10:00:00.0"));
+        try {
+            integrationPlan.proceedNewEntity(mockConnection, new Object(), context);
+            fail("cleanup type unknown");
+        }
+        catch (IllegalArgumentException ex) {
+            assertEquals("cleanup type unknown (delete or drop).", ex.getMessage());
+        }
+    }
+
+
     /**
      * The JUnit setup method
      */
@@ -415,6 +456,13 @@ public class IntegrationPlanTest extends TestCase {
      */
     private void mockDropTemporaryTable() throws SQLException {
         mockCreateStatement("drop table TABLE");
+        mockStatement.close();
+        statementControl.setVoidCallable(1);
+    }
+
+
+    private void mockDeleteTemporaryTable() throws SQLException {
+        mockCreateStatement("delete from TABLE");
         mockStatement.close();
         statementControl.setVoidCallable(1);
     }
