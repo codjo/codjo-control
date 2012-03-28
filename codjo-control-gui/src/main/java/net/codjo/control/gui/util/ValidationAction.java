@@ -4,6 +4,7 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.gui.util;
+import net.codjo.gui.toolkit.waiting.WaitingPanel;
 import net.codjo.mad.client.request.Row;
 import net.codjo.mad.gui.framework.GuiContext;
 import net.codjo.mad.gui.request.RequestTable;
@@ -14,9 +15,9 @@ import net.codjo.mad.gui.request.RequestTable;
  * @version $Revision: 1.2 $
  */
 public class ValidationAction extends AbstractValidateAction {
-    public ValidationAction(GuiContext ctxt, RequestTable table) {
+    public ValidationAction(GuiContext ctxt, RequestTable table, WaitingPanel waitingPanel) {
         super(ctxt, "Valider", "Valide les contrôles des lignes selectionnées",
-              "/images/control.validation.gif", table);
+              "/images/control.validation.gif", table, waitingPanel);
     }
 
 

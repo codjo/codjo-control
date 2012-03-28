@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
+import net.codjo.control.common.i18n.InternationalizationFixture;
 import org.easymock.MockControl;
 /**
  * Description of the Class
@@ -18,6 +19,7 @@ import org.easymock.MockControl;
  * @version $Revision: 1.7 $
  */
 public class PlanTest extends TestCase {
+    private InternationalizationFixture i18nFixture = new InternationalizationFixture();
     private Dictionary dico;
     private Connection mockConnection;
     private Plan plan;
@@ -27,8 +29,6 @@ public class PlanTest extends TestCase {
 
     /**
      * Verifie l'ordre d'execution des Step (par priorité ascendante) en mode JAVA.
-     *
-     * @throws Exception
      */
     public void test_executeJAVA_StepOrder() throws Exception {
         FakeStep step2 = new FakeStep(2, Step.FOR_BATCH);
@@ -107,8 +107,6 @@ public class PlanTest extends TestCase {
 
     /**
      * Verifie que si le plan n'est pas en mode JAVA, l'appel a executeJAVA echoue.
-     *
-     * @throws Exception
      */
     public void test_executeJAVA_failure_badMode()
           throws Exception {
@@ -130,9 +128,6 @@ public class PlanTest extends TestCase {
 
     /**
      * Verifie l'ordre d'execution des Step (par priorité ascendante) en mode SQL.
-     *
-     * @throws SQLException
-     * @throws ControlException
      */
     public void test_executeSQL_StepOrder() throws SQLException, ControlException {
         FakeStep step2 = new FakeStep(2, Step.FOR_BATCH);
@@ -154,9 +149,6 @@ public class PlanTest extends TestCase {
 
     /**
      * Verifie l'ordre d'execution des Step (par priorité ascendante) en simulant Castor.
-     *
-     * @throws SQLException
-     * @throws ControlException
      */
     public void test_executeSQL_StepOrder_Castor()
           throws SQLException, ControlException {
@@ -199,8 +191,6 @@ public class PlanTest extends TestCase {
 
     /**
      * Verifie que si une étape en mode SQL échoue, on arrête le processus.
-     *
-     * @throws ControlException
      */
     public void test_executeSQL_failure() throws ControlException {
         FakeStep step2 = new FakeStep(2, Step.FOR_BATCH);
@@ -224,9 +214,6 @@ public class PlanTest extends TestCase {
 
     /**
      * Verifie que si le plan n'est pas en mode SQL, l'appel a executeSQL echoue.
-     *
-     * @throws SQLException
-     * @throws ControlException
      */
     public void test_executeSQL_failure_badMode()
           throws SQLException, ControlException {
@@ -253,7 +240,9 @@ public class PlanTest extends TestCase {
 
 
     @Override
-    protected void setUp() {
+    protected void setUp() throws Exception {
+        i18nFixture.doSetUp();
+
         initMockStuff();
         plan = new Plan();
         dico = new Dictionary();
@@ -263,7 +252,8 @@ public class PlanTest extends TestCase {
 
 
     @Override
-    protected void tearDown() {
+    protected void tearDown() throws Exception {
+        i18nFixture.doTearDown();
     }
 
 

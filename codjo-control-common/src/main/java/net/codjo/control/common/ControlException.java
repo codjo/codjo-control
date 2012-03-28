@@ -4,10 +4,11 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.common;
-import net.codjo.control.common.util.EntityResultState;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import org.apache.log4j.Logger;
+import net.codjo.control.common.util.EntityResultState;
+
+import static net.codjo.i18n.common.plugin.InternationalizationUtil.translate;
 /**
  * Control en erreur.
  *
@@ -18,7 +19,7 @@ public class ControlException extends Exception implements EntityResultState {
     private Exception cause = null;
     private String errorLog;
     private int errorType;
-    private static final Logger APP = Logger.getLogger(ControlException.class);
+
 
     public ControlException(int errorType, String errorLog) {
         this(errorType, errorLog, null);
@@ -36,11 +37,12 @@ public class ControlException extends Exception implements EntityResultState {
 
 
     public ControlException(int errorType, String errorLog, Exception cause) {
-        super("Erreur " + errorType + " - " + errorLog);
+        super(translate("ControlException.error") + " " + errorType + " - " + errorLog);
         this.errorLog = errorLog;
         this.errorType = errorType;
         this.cause = cause;
     }
+
 
     @Override
     public Exception getCause() {
@@ -82,7 +84,7 @@ public class ControlException extends Exception implements EntityResultState {
     public void printStackTrace(PrintStream stream) {
         super.printStackTrace(stream);
         if (getCause() != null) {
-            System.err.println(" ---- cause ---- ");
+            stream.println(" ---- cause ---- ");
             getCause().printStackTrace(stream);
         }
     }

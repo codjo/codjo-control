@@ -47,6 +47,8 @@
         <select-where-clause>$ligne qui sont valide$</select-where-clause>
     </shipment>
 
+    <cleanup type="delete"/>
+
     <plans>
         <plan>
             <step id="FirstControl" priority="1" type="filler">

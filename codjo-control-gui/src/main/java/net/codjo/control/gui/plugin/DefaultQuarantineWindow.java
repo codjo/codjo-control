@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
@@ -21,11 +22,13 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import net.codjo.agent.AgentContainer;
 import net.codjo.agent.UserId;
 import net.codjo.control.common.message.TransferJobRequest;
+import net.codjo.control.common.message.TransferJobRequest.Transfer;
 import net.codjo.control.gui.data.DbFilterData;
 import net.codjo.control.gui.data.QuarantineGuiData;
 import net.codjo.control.gui.data.WindowData;
@@ -59,6 +62,7 @@ import net.codjo.mad.gui.request.RequestComboBox;
 import net.codjo.mad.gui.request.RequestRecordCountField;
 import net.codjo.mad.gui.request.RequestTable;
 import net.codjo.mad.gui.request.RequestToolBar;
+import net.codjo.mad.gui.request.action.DeleteAction;
 import net.codjo.mad.gui.request.event.DataSourceAdapter;
 import net.codjo.mad.gui.request.event.DataSourceEvent;
 import net.codjo.mad.gui.request.factory.SelectFactory;
@@ -72,13 +76,13 @@ import static net.codjo.mad.gui.i18n.InternationalizationUtil.translate;
 
 class DefaultQuarantineWindow extends JInternalFrame implements InternationalizableContainer {
     public static final String QUARANTINE_GUI_DATA = "QuarantineGuiData";
-    private static final String QUARANTINE_TO_USER = "DefaultQuarantineWindow.transfertUser";
+    protected static final String QUARANTINE_TO_USER = "DefaultQuarantineWindow.transfertUser";
     private static final String USER_TO_QUARANTINE = "DefaultQuarantineWindow.transfertQuarantine";
     private static final String TOUT = "Tout";
 
     private QuarantineGuiData guiData;
     private final UserId userId;
-    private GuiContext guiContext;
+    protected GuiContext guiContext;
     private RequestTable requestTable;
     private boolean preventReloadFilterPanel;
     private QuarantineFilterPanel filterPanel;
@@ -112,9 +116,17 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         initDbFilters();
         TranslationNotifier translationNotifier = retrieveTranslationNotifier(context);
         translationNotifier.addInternationalizableContainer(this);
-        guiContext.executeTask(new QuarantineRunnable(translate("DefaultQuarantineWindow.lineUpload", guiContext),
-                                                      TransferJobRequest.Transfer.QUARANTINE_TO_USER,
-                                                      translate(QUARANTINE_TO_USER, guiContext)));
+        initQuarantineLoad();
+    }
+
+
+    protected void initQuarantineLoad() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                waitingPanel.exec(new QuarantineRunnable(Transfer.QUARANTINE_TO_USER,
+                                                         QUARANTINE_TO_USER));
+            }
+        });
     }
 
 
@@ -170,7 +182,8 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         }
         notifier.addInternationalizableComponent(sendButton, "DefaultQuarantineWindow.sendButton", null);
         notifier.addInternationalizableComponent(forceButton, null, "DefaultQuarantineWindow.forceButton.tooltip");
-        notifier.addInternationalizableComponent(validationButton, null, "DefaultQuarantineWindow.validateButton.tooltip");
+        notifier.addInternationalizableComponent(validationButton,
+                                                 null, "DefaultQuarantineWindow.validateButton.tooltip");
     }
 
 
@@ -192,22 +205,40 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             toolBar.replace(RequestToolBar.ACTION_EXPORT_ALL_PAGES, action);
         }
 
+        Action deleteAction = toolBar.getAction(RequestToolBar.ACTION_DELETE);
+        if (deleteAction != null) {
+            DeleteControlAction deleteControlAction = new DeleteControlAction(guiContext, requestTable, waitingPanel);
+            /*
+             * The Method replace used below modifies the component name linked to the action.
+             * In order to keep the same name, we retrieve its previous name before replacing.
+             */
+            JButton button = toolBar.getButtonInToolBar(deleteAction);
+            String deleteActionName = null;
+            if (button != null) {
+                deleteActionName = button.getName();
+            }
+            toolBar.replace(RequestToolBar.ACTION_DELETE, deleteControlAction);
+            if (deleteActionName != null) {
+                button.setName(deleteActionName);
+            }
+        }
+
         ForceAction forceAction;
         if (guiData.getWindow().getForceAction() != null) {
-            forceAction = (ForceAction)newAction(guiData.getWindow().getForceAction());
+            forceAction = (ForceAction)newValidateAction(guiData.getWindow().getForceAction());
         }
         else {
-            forceAction = new ForceAction(guiContext, requestTable);
+            forceAction = new ForceAction(guiContext, requestTable, waitingPanel);
         }
         forceButton = toolBar.add(forceAction);
         forceButton.setName(QuarantineUtil.QUARANTINE_FORCE_BUTTON_NAME);
 
         ValidationAction validationAction;
         if (guiData.getWindow().getValidationAction() != null) {
-            validationAction = (ValidationAction)newAction(guiData.getWindow().getValidationAction());
+            validationAction = (ValidationAction)newValidateAction(guiData.getWindow().getValidationAction());
         }
         else {
-            validationAction = new ValidationAction(guiContext, requestTable);
+            validationAction = new ValidationAction(guiContext, requestTable, waitingPanel);
         }
         validationButton = toolBar.add(validationAction);
         validationButton.setName(QuarantineUtil.QUARANTINE_OK_BUTTON_NAME);
@@ -414,28 +445,34 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         ScheduleLauncher launcher = new ScheduleLauncher(userId);
         launcher.setWorkflowConfiguration(guiData.getWorkflowConfiguration());
         launcher.executeWorkflow(container, transferRequest.toRequest());
-        if (transferType.equals(TransferJobRequest.Transfer.QUARANTINE_TO_USER)) {
-            Collection<DbFilterData> dbFilters = guiData.getWindow().getDbFilters();
-            if (dbFilters == null || dbFilters.size() < 1) {
-                return;
+        if (transferType.equals(Transfer.QUARANTINE_TO_USER)) {
+            buildSelectorColumns();
+        }
+    }
+
+
+    private void buildSelectorColumns() {
+
+        Collection<DbFilterData> dbFilters = guiData.getWindow().getDbFilters();
+        if (dbFilters == null || dbFilters.size() < 1) {
+            return;
+        }
+        try {
+            FieldsList fieldsList = new FieldsList();
+            fieldsList.addField("tableName", guiData.getQuser());
+            SelectFactory selectFactory = new SelectFactory("selectAllQuarantineColumnsFromTable");
+            selectFactory.init(fieldsList);
+            SelectRequest request = (SelectRequest)selectFactory.buildRequest(null);
+            request.setPage(1, 1000);
+            Result result = guiContext.getSender().send(request);
+            for (Object aList : result.getRows()) {
+                Row row = (Row)aList;
+                allFieldsSelector.addField(StringUtil.sqlToJavaName(row.getFieldValue("value")), TOUT);
             }
-            try {
-                FieldsList fieldsList = new FieldsList();
-                fieldsList.addField("tableName", guiData.getQuser());
-                SelectFactory selectFactory = new SelectFactory("selectAllQuarantineColumnsFromTable");
-                selectFactory.init(fieldsList);
-                SelectRequest request = (SelectRequest)selectFactory.buildRequest(null);
-                request.setPage(1, 1000);
-                Result result = guiContext.getSender().send(request);
-                for (Object aList : result.getRows()) {
-                    Row row = (Row)aList;
-                    allFieldsSelector.addField(StringUtil.sqlToJavaName(row.getFieldValue("value")), TOUT);
-                }
-            }
-            catch (RequestException exception) {
-                String message = translate("DefaultQuarantineWindow.errorColumn", guiContext);
-                ErrorDialog.show(this, message, exception);
-            }
+        }
+        catch (RequestException exception) {
+            String message = translate("DefaultQuarantineWindow.errorColumn", guiContext);
+            ErrorDialog.show(this, message, exception);
         }
     }
 
@@ -446,6 +483,15 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         Class actionClass = Class.forName(className);
         Constructor constructor = actionClass.getConstructor(GuiContext.class, RequestTable.class);
         return constructor.newInstance(guiContext, requestTable);
+    }
+
+
+    private Object newValidateAction(String className)
+          throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
+                 IllegalAccessException, InstantiationException {
+        Class actionClass = Class.forName(className);
+        Constructor constructor = actionClass.getConstructor(GuiContext.class, RequestTable.class, WaitingPanel.class);
+        return constructor.newInstance(guiContext, requestTable, waitingPanel);
     }
 
 
@@ -460,34 +506,6 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
         return null;
     }
 
-
-    private class QuarantineRunnable extends SwingRunnable {
-        private TransferJobRequest.Transfer transfer;
-        private String errorMessage;
-
-
-        QuarantineRunnable(String title, TransferJobRequest.Transfer transfer, String errorMessage) {
-            super(title);
-            this.transfer = transfer;
-            this.errorMessage = errorMessage;
-        }
-
-
-        public void run() {
-            try {
-                proceedTransfert(transfer);
-            }
-            catch (Exception reqex) {
-                ErrorDialog.show(DefaultQuarantineWindow.this, errorMessage, reqex);
-            }
-        }
-
-
-        @Override
-        public void updateGui() {
-            loadRequestTable(transfer);
-        }
-    }
 
     private class QuarantineFilterPanel extends FilterPanel {
         private QuarantineFilterPanel(RequestTable requestTable) {
@@ -534,27 +552,8 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
 
     private class SendButtonActionListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
-            if (guiData.getWindow().isSyncValidation()) {
-                waitingPanel.exec(new Runnable() {
-                    public void run() {
-                        try {
-                            proceedTransfert(TransferJobRequest.Transfer.USER_TO_QUARANTINE);
-                            loadRequestTable(TransferJobRequest.Transfer.USER_TO_QUARANTINE);
-                        }
-                        catch (Exception ex) {
-                            ErrorDialog.show(DefaultQuarantineWindow.this,
-                                             translate(USER_TO_QUARANTINE, guiContext),
-                                             ex);
-                        }
-                    }
-                });
-            }
-            else {
-                guiContext.executeTask(
-                      new QuarantineRunnable(translate("DefaultQuarantineWindow.lineProcessing", guiContext),
-                                             TransferJobRequest.Transfer.USER_TO_QUARANTINE,
-                                             translate(USER_TO_QUARANTINE, guiContext)));
-            }
+            waitingPanel.exec(new QuarantineRunnable(TransferJobRequest.Transfer.USER_TO_QUARANTINE,
+                                                     USER_TO_QUARANTINE));
         }
     }
 
@@ -577,6 +576,48 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
                 value = translate("DefaultQuarantineWindow.filterComboBox.all", guiContext);
             }
             return actualRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+        }
+    }
+
+    protected class QuarantineRunnable extends SwingRunnable {
+        private Transfer transferType;
+        private String keyMessage;
+
+
+        protected QuarantineRunnable(Transfer transferType, String keyMessage) {
+            this.transferType = transferType;
+            this.keyMessage = keyMessage;
+        }
+
+
+        public void run() {
+            try {
+                proceedTransfert(transferType);
+                loadRequestTable(transferType);
+            }
+            catch (Exception ex) {
+                ErrorDialog.show(DefaultQuarantineWindow.this, translate(keyMessage, guiContext), ex);
+            }
+        }
+    }
+
+    protected class DeleteControlAction extends DeleteAction {
+        private WaitingPanel waitingPanel;
+
+
+        protected DeleteControlAction(GuiContext ctxt, RequestTable table, WaitingPanel waitingPanel) {
+            super(ctxt, table);
+            this.waitingPanel = waitingPanel;
+        }
+
+
+        @Override
+        public void actionPerformed(final ActionEvent event) {
+            waitingPanel.exec(new Runnable() {
+                public void run() {
+                    DeleteControlAction.super.actionPerformed(event);
+                }
+            });
         }
     }
 }

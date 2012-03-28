@@ -1,4 +1,5 @@
 package net.codjo.control.server.plugin;
+import java.io.IOException;
 import net.codjo.agent.AgentContainer;
 import net.codjo.agent.ContainerConfiguration;
 import net.codjo.agent.ContainerFailureException;
@@ -12,6 +13,9 @@ import net.codjo.control.common.message.ControlJobRequest;
 import net.codjo.control.common.message.TransferJobRequest;
 import net.codjo.control.server.audit.ControlStringifier;
 import net.codjo.control.server.audit.TransferStringifier;
+import net.codjo.i18n.common.Language;
+import net.codjo.i18n.common.TranslationManager;
+import net.codjo.i18n.common.plugin.InternationalizationPlugin;
 import net.codjo.mad.server.plugin.MadServerPlugin;
 import net.codjo.plugin.common.ApplicationCore;
 import net.codjo.plugin.server.ServerPlugin;
@@ -22,7 +26,6 @@ import net.codjo.workflow.server.api.ResourcesManagerAgent;
 import net.codjo.workflow.server.api.ResourcesManagerAgent.AgentFactory;
 import net.codjo.workflow.server.plugin.WorkflowServerPlugin;
 import net.codjo.xml.XmlException;
-import java.io.IOException;
 
 public final class ControlServerPlugin implements ServerPlugin {
     private final MadServerPlugin madServerPlugin;
@@ -34,17 +37,19 @@ public final class ControlServerPlugin implements ServerPlugin {
     public static final String QUARANTINE_TABLE = ControlJobRequest.QUARANTINE_TABLE;
 
 
-    public ControlServerPlugin(WorkflowServerPlugin workflowServerPlugin) {
-        this(workflowServerPlugin, null, null);
+    public ControlServerPlugin(WorkflowServerPlugin workflowServerPlugin, InternationalizationPlugin i18nPlugin) {
+        this(workflowServerPlugin, i18nPlugin, null, null);
     }
 
 
     public ControlServerPlugin(WorkflowServerPlugin workflowServerPlugin,
+                               InternationalizationPlugin i18nPlugin,
                                MadServerPlugin madServerPlugin,
                                ApplicationCore core) {
         this.madServerPlugin = madServerPlugin;
         this.applicationCore = core;
 
+        registerLanguageBundles(i18nPlugin.getConfiguration().getTranslationManager());
         workflowServerPlugin.getConfiguration().registerJobBuilder(new ControlJobRequestHandler());
         new ControlStringifier().install(workflowServerPlugin);
         new TransferStringifier().install(workflowServerPlugin);
@@ -71,6 +76,14 @@ public final class ControlServerPlugin implements ServerPlugin {
 
         createTransferService(agentContainer, preference);
         createControlService(agentContainer, preference);
+    }
+
+
+    private void registerLanguageBundles(TranslationManager translationManager) {
+        translationManager.addBundle("net.codjo.control.common.i18n", Language.FR);
+        translationManager.addBundle("net.codjo.control.common.i18n", Language.EN);
+        translationManager.addBundle("net.codjo.control.server.i18n", Language.FR);
+        translationManager.addBundle("net.codjo.control.server.i18n", Language.EN);
     }
 
 

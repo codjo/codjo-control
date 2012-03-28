@@ -4,8 +4,6 @@
  * Common Apache License 2.0
  */
 package net.codjo.control.common;
-import net.codjo.control.common.util.EntityIterator;
-import net.codjo.control.common.util.EntityResultState;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import net.codjo.control.common.util.EntityIterator;
+import net.codjo.control.common.util.EntityResultState;
 import org.apache.log4j.Logger;
 /**
  * Classe representant un plan d'intégration.
@@ -25,6 +25,8 @@ public class IntegrationPlan {
     private static final Logger APP = Logger.getLogger(IntegrationPlan.class);
     private static final ControlContext DEFAULT_CONTEXT =
           new ControlContext("auto", "auto", null);
+    public static final String CLEANUP_TYPE_DELETE = "delete";
+    public static final String CLEANUP_TYPE_DROP = "drop";
     private Dictionary dictionary = new Dictionary();
     private String controlTableDef;
     private String description;
@@ -35,6 +37,7 @@ public class IntegrationPlan {
     private Shipment shipment;
     private Entity entity;
     private StepsList abstractSteps = new StepsList();
+    private String cleanUpType = CLEANUP_TYPE_DROP;
 
 
     public IntegrationPlan() {
@@ -164,7 +167,15 @@ public class IntegrationPlan {
 
 
     public void cleanUp(final Connection con) throws SQLException {
-        dropControlTable(con);
+        if (CLEANUP_TYPE_DELETE.equals(cleanUpType)) {
+            deleteControlTable(con);
+        }
+        else if (CLEANUP_TYPE_DROP.equals(cleanUpType)) {
+            dropControlTable(con);
+        }
+        else {
+            throw new IllegalArgumentException("cleanup type unknown (delete or drop).");
+        }
     }
 
 
@@ -277,8 +288,7 @@ public class IntegrationPlan {
 
 
     /**
-     * @deprecated utilisé la version {@link #proceedUpdatedEntity(java.sql.Connection,Object,
-     *             ControlContext)}
+     * @deprecated utilisé la version {@link #proceedUpdatedEntity(java.sql.Connection, Object, ControlContext)}
      */
     @Deprecated
     public void proceedEntity(final Connection con, final Object vo,
@@ -421,8 +431,7 @@ public class IntegrationPlan {
     }
 
 
-    private void dropControlTable(Connection con)
-          throws SQLException {
+    private void dropControlTable(Connection con) throws SQLException {
         if (getControlTableDef() == null) {
             return;
         }
@@ -432,6 +441,20 @@ public class IntegrationPlan {
         }
         catch (SQLException e) {
             APP.debug("Drop de la table " + getControlTableName(), e);
+        }
+        finally {
+            stmt.close();
+        }
+    }
+
+
+    private void deleteControlTable(Connection con) throws SQLException {
+        Statement stmt = con.createStatement();
+        try {
+            stmt.executeUpdate("delete from " + getControlTableName());
+        }
+        catch (SQLException e) {
+            APP.debug("Delete de la table " + getControlTableName(), e);
         }
         finally {
             stmt.close();
@@ -483,5 +506,15 @@ public class IntegrationPlan {
         if (entityState.getErrorType() != EntityResultState.NO_ERROR) {
             throw new ControlException(entityState);
         }
+    }
+
+
+    public void setCleanUpType(String cleanUpType) {
+        this.cleanUpType = cleanUpType;
+    }
+
+
+    public String getCleanUpType() {
+        return cleanUpType;
     }
 }

@@ -1,177 +1,193 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-<!-- définition du type pour plan_type -->
-<xs:simpleType name="plan_type">
-  <xs:restriction base="xs:string">
-    <xs:enumeration value="sql" />
-    <xs:enumeration value="java" />
-    <xs:enumeration value="mass" />
-  </xs:restriction>
-</xs:simpleType>
+    <!-- définition du type pour plan_type -->
+    <xs:simpleType name="plan_type">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="sql"/>
+            <xs:enumeration value="java"/>
+            <xs:enumeration value="mass"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-<!-- définition du type pour step_for -->
-<xs:simpleType name="step_forType">
-  <xs:restriction base="xs:string">
-    <xs:enumeration value="user"/>
-    <xs:enumeration value="user.add"/>
-    <xs:enumeration value="user.update"/>
-    <xs:enumeration value="batch"/>
-    <xs:enumeration value="all"/>
-    <xs:enumeration value="import"/>
-    <xs:enumeration value="transfertq"/>
-    <xs:enumeration value="batch/import"/>
-    <xs:enumeration value="batch/transfertq"/>
-  </xs:restriction>
-</xs:simpleType>
+    <!-- définition du type pour step_for -->
+    <xs:simpleType name="step_forType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="user"/>
+            <xs:enumeration value="user.add"/>
+            <xs:enumeration value="user.update"/>
+            <xs:enumeration value="batch"/>
+            <xs:enumeration value="all"/>
+            <xs:enumeration value="import"/>
+            <xs:enumeration value="transfertq"/>
+            <xs:enumeration value="batch/import"/>
+            <xs:enumeration value="batch/transfertq"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-<!-- definition of simple elements -->
-<xs:element name="description" type="xs:string"/>
-<xs:element name="table" type="xs:string"/>
-<xs:element name="class" type="xs:string"/>
-<xs:element name="batch-class" type="xs:string"/>
+    <!-- définition du type pour cleanup_type -->
+    <xs:simpleType name="cleanup_type">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="delete"/>
+            <xs:enumeration value="drop"/>
+        </xs:restriction>
+    </xs:simpleType>
 
-<!-- variable -->
-<xs:element name="variable">
-     <xs:complexType>
-          <xs:attribute name="name" type="xs:string" use="required"/>
-          <xs:attribute name="value" type="xs:string" use="required"/>
-     </xs:complexType>
-</xs:element>
+    <!-- definition of simple elements -->
+    <xs:element name="description" type="xs:string"/>
+    <xs:element name="table" type="xs:string"/>
+    <xs:element name="class" type="xs:string"/>
+    <xs:element name="batch-class" type="xs:string"/>
 
-<!-- Dictionary -->
-<xs:element name="dictionary">
-     <xs:complexType>
-          <xs:sequence minOccurs="0" maxOccurs="unbounded">
-            <xs:element ref="variable"/>
-          </xs:sequence>
-     </xs:complexType>
-</xs:element>
+    <!-- variable -->
+    <xs:element name="variable">
+        <xs:complexType>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
-<!-- entity -->
-<xs:element name="entity">
-     <xs:complexType>
-          <xs:sequence>
-            <xs:element ref="class" minOccurs="0" maxOccurs="1"/>
-            <xs:element ref="batch-class" minOccurs="0" maxOccurs="1"/>
-          </xs:sequence>
-     </xs:complexType>
-</xs:element>
-
-<!-- shipment -->
-<xs:element name="shipment">
-     <xs:complexType>
-          <xs:sequence>
-            <xs:element name="from-pk-field" type="xs:ID"/>
-            <xs:element name="select-where-clause" type="xs:string"/>
-          </xs:sequence>
-          <xs:attribute name="from" type="xs:string" use="required"/>
-          <xs:attribute name="to" type="xs:string" use="required"/>
-     </xs:complexType>
-</xs:element>
-
-<!-- parameter -->
-<xs:element name="parameter">
-     <xs:complexType>
-        <xs:simpleContent>
-            <xs:extension base="xs:string">
-                <xs:attribute name="index" type="xs:integer" use="required"/>
-                <xs:attribute name="type" type="xs:string" use="required"/>
-            </xs:extension>
-        </xs:simpleContent>
-     </xs:complexType>
-</xs:element>
-
-<!-- query -->
-<xs:element name="query">
-     <xs:complexType>
-        <xs:simpleContent>
-            <xs:extension base="xs:string">
-                <xs:attribute name="use_temporary_table" type="xs:string" use="optional"/>
-                <xs:attribute name="ignore_warning" type="xs:string" use="optional"/>
-            </xs:extension>
-        </xs:simpleContent>
-     </xs:complexType>
-</xs:element>
-
-<!-- step -->
-<xs:element name="step">
-     <xs:complexType>
-          <xs:sequence>
-            <xs:element ref="description"/>
-            <xs:element name="test" type="xs:string"/>
-            <xs:element ref="dictionary" minOccurs="0"/>
+    <!-- Dictionary -->
+    <xs:element name="dictionary">
+        <xs:complexType>
             <xs:sequence minOccurs="0" maxOccurs="unbounded">
-                <xs:element ref="parameter"/>
+                <xs:element ref="variable"/>
             </xs:sequence>
-            <xs:choice>
-                <xs:element ref="query" />
-                <xs:element ref="class" />
-            </xs:choice>
-          </xs:sequence>
-          <xs:attribute name="id" type="xs:ID" use="required"/>
-          <xs:attribute name="inheritId" type="xs:string" use="optional"/>
-          <xs:attribute name="priority" type="xs:integer" use="required"/>
-          <xs:attribute name="type" type="xs:string" use="required"/>
-          <xs:attribute name="error_code" type="xs:integer" use="optional"/>
-          <xs:attribute name="error_message" type="xs:string" use="optional"/>
-          <xs:attribute name="step_for" type="step_forType" use="optional" />
-     </xs:complexType>
-</xs:element>
+        </xs:complexType>
+    </xs:element>
 
-<!-- plan -->
-<xs:element name="plan">
-     <xs:complexType>
-        <xs:sequence minOccurs="1" maxOccurs="unbounded">
-            <xs:element ref="step"/>
-        </xs:sequence>
-        <xs:attribute name="type" type="plan_type" use="optional" />
-     </xs:complexType>
-</xs:element>
+    <!-- entity -->
+    <xs:element name="entity">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="class" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="batch-class" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
-<!-- plans -->
-<xs:element name="plans">
-     <xs:complexType>
-        <xs:sequence minOccurs="1" maxOccurs="unbounded">
-            <xs:element ref="plan"/>
-        </xs:sequence>
-     </xs:complexType>
-</xs:element>
+    <!-- shipment -->
+    <xs:element name="shipment">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="from-pk-field" type="xs:ID"/>
+                <xs:element name="select-where-clause" type="xs:string"/>
+            </xs:sequence>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
-<!-- plans_delete -->
-<xs:element name="plans_delete">
-     <xs:complexType>
-        <xs:sequence minOccurs="1" maxOccurs="unbounded">
-            <xs:element ref="plan"/>
-        </xs:sequence>
-     </xs:complexType>
-</xs:element>
+    <!-- cleanup -->
+    <xs:element name="cleanup">
+        <xs:complexType>
+            <xs:attribute name="type" type="cleanup_type" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
-<!-- dispatch -->
-<xs:element name="dispatch">
-     <xs:complexType>
-          <xs:sequence minOccurs="0" maxOccurs="unbounded">
-            <xs:element ref="step"/>
-          </xs:sequence>
-          <xs:attribute name="type" type="plan_type" use="optional" />
-     </xs:complexType>
-</xs:element>
+    <!-- parameter -->
+    <xs:element name="parameter">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="index" type="xs:integer" use="required"/>
+                    <xs:attribute name="type" type="xs:string" use="required"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
 
-<!-- Integration Plan -->
-<xs:element name="integration-plan">
-     <xs:complexType>
-          <xs:sequence>
-            <xs:element ref="description"/>
-            <xs:element ref="dictionary" minOccurs="0"/>
-            <xs:element ref="entity" minOccurs="0"/>
-            <xs:element ref="table" minOccurs="0"/>
-            <xs:element ref="shipment" minOccurs="0"/>
-            <xs:element ref="plans"/>
-            <xs:element ref="plans_delete" minOccurs="0"/>
-            <xs:element ref="dispatch" minOccurs="0"/>
-          </xs:sequence>
-          <xs:attribute name="id" type="xs:ID" use="required"/>
-     </xs:complexType>
-</xs:element>
+    <!-- query -->
+    <xs:element name="query">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="use_temporary_table" type="xs:string" use="optional"/>
+                    <xs:attribute name="ignore_warning" type="xs:string" use="optional"/>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- step -->
+    <xs:element name="step">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="description"/>
+                <xs:element name="test" type="xs:string"/>
+                <xs:element ref="dictionary" minOccurs="0"/>
+                <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                    <xs:element ref="parameter"/>
+                </xs:sequence>
+                <xs:choice>
+                    <xs:element ref="query"/>
+                    <xs:element ref="class"/>
+                </xs:choice>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:ID" use="required"/>
+            <xs:attribute name="inheritId" type="xs:string" use="optional"/>
+            <xs:attribute name="priority" type="xs:integer" use="required"/>
+            <xs:attribute name="type" type="xs:string" use="required"/>
+            <xs:attribute name="error_code" type="xs:integer" use="optional"/>
+            <xs:attribute name="error_message" type="xs:string" use="optional"/>
+            <xs:attribute name="step_for" type="step_forType" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- plan -->
+    <xs:element name="plan">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                <xs:element ref="step"/>
+            </xs:sequence>
+            <xs:attribute name="type" type="plan_type" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- plans -->
+    <xs:element name="plans">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                <xs:element ref="plan"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- plans_delete -->
+    <xs:element name="plans_delete">
+        <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                <xs:element ref="plan"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- dispatch -->
+    <xs:element name="dispatch">
+        <xs:complexType>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="step"/>
+            </xs:sequence>
+            <xs:attribute name="type" type="plan_type" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Integration Plan -->
+    <xs:element name="integration-plan">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="description"/>
+                <xs:element ref="dictionary" minOccurs="0"/>
+                <xs:element ref="entity" minOccurs="0"/>
+                <xs:element ref="table" minOccurs="0"/>
+                <xs:element ref="shipment" minOccurs="0"/>
+                <xs:element ref="cleanup" minOccurs="0"/>
+                <xs:element ref="plans"/>
+                <xs:element ref="plans_delete" minOccurs="0"/>
+                <xs:element ref="dispatch" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:ID" use="required"/>
+        </xs:complexType>
+    </xs:element>
 
 </xs:schema>
