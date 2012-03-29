@@ -3,6 +3,7 @@ import net.codjo.agent.AgentContainerMock;
 import net.codjo.agent.ContainerConfigurationMock;
 import net.codjo.agent.test.AgentContainerFixture;
 import net.codjo.agent.test.Story.ConnectionType;
+import net.codjo.i18n.common.plugin.InternationalizationPlugin;
 import net.codjo.mad.server.plugin.MadServerPluginMock;
 import net.codjo.plugin.server.ServerCoreMock;
 import net.codjo.test.common.LogString;
@@ -33,6 +34,7 @@ public class ControlServerPluginTest {
         when(workflowServerPluginMock.getConfiguration()).thenReturn(pluginConfigurationMock);
 
         plugin = new ControlServerPlugin(workflowServerPluginMock,
+                                         new InternationalizationPlugin(),
                                          new MadServerPluginMock(new LogString("madServerPlugin", log)),
                                          new ServerCoreMock(new LogString("core", log), fixture));
 
@@ -59,7 +61,7 @@ public class ControlServerPluginTest {
         WorkflowServerPluginConfiguration configuration = mock(WorkflowServerPluginConfiguration.class);
         when(workflowServerPlugin.getConfiguration()).thenReturn(configuration);
 
-        plugin = new ControlServerPlugin(workflowServerPlugin);
+        plugin = new ControlServerPlugin(workflowServerPlugin, new InternationalizationPlugin());
 
         plugin.initContainer(new ContainerConfigurationMock(log));
         plugin.start(new AgentContainerMock(new LogString()));

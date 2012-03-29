@@ -16,16 +16,14 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import net.codjo.gui.toolkit.util.ErrorDialog;
+import net.codjo.gui.toolkit.waiting.WaitingPanel;
 import net.codjo.mad.client.request.FieldsList;
 import net.codjo.mad.client.request.RequestException;
 import net.codjo.mad.client.request.Row;
 import net.codjo.mad.gui.framework.AbstractGuiAction;
 import net.codjo.mad.gui.framework.GuiContext;
-import net.codjo.mad.gui.framework.SwingRunnable;
 import net.codjo.mad.gui.request.RequestTable;
 import net.codjo.mad.gui.request.factory.RequestFactory;
-
-import static net.codjo.mad.gui.i18n.InternationalizationUtil.translate;
 /**
  * Action permettant un cours ou un Ordre d'eviter ou de bypasser un controle.
  *
@@ -36,6 +34,7 @@ abstract class AbstractValidateAction extends AbstractGuiAction implements Quara
     protected static final String ERROR_TYPE = "errorType";
     private RequestTable table = null;
     protected Collection<String> groupingColumn = null;
+    private WaitingPanel waitingPanel;
 
 
     /**
@@ -48,8 +47,9 @@ abstract class AbstractValidateAction extends AbstractGuiAction implements Quara
      * @param table            La table a manager
      */
     protected AbstractValidateAction(GuiContext ctxt, String name, String shortDescription,
-                                     String icon, RequestTable table) {
+                                     String icon, RequestTable table, WaitingPanel waitingPanel) {
         super(ctxt, name, shortDescription, icon);
+        this.waitingPanel = waitingPanel;
         setEnabled(false);
         this.table = table;
         table.getSelectionModel().addListSelectionListener(new EnableStateUpdater());
@@ -59,7 +59,7 @@ abstract class AbstractValidateAction extends AbstractGuiAction implements Quara
     public void actionPerformed(ActionEvent parm1) {
         table.setEnabled(false);
         this.setEnabled(false);
-        getGuiContext().executeTask(new ValidorWorker());
+        waitingPanel.exec(new ValidorWorker(), new PostValidorWorker());
     }
 
 
@@ -127,11 +127,7 @@ abstract class AbstractValidateAction extends AbstractGuiAction implements Quara
     }
 
 
-    private class ValidorWorker extends SwingRunnable {
-        private ValidorWorker() {
-            super(translate("DefaultQuarantineWindow.lineProcessing", getGuiContext()));
-        }
-
+    private class ValidorWorker implements Runnable {
 
         public void run() {
             Row[] rows = findRowsToValidate();
@@ -176,10 +172,14 @@ abstract class AbstractValidateAction extends AbstractGuiAction implements Quara
             });
             return rows;
         }
+    }
+
+    private class PostValidorWorker implements Runnable {
+        private PostValidorWorker() {
+        }
 
 
-        @Override
-        public void updateGui() {
+        public void run() {
             reloadTableData();
             table.setEnabled(true);
         }

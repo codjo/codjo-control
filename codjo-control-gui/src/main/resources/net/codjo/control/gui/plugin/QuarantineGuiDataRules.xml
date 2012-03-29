@@ -24,7 +24,6 @@
         <bean-property-setter-rule pattern="preference"/>
         <bean-property-setter-rule pattern="windowWidth"/>
         <bean-property-setter-rule pattern="windowHeight"/>
-        <bean-property-setter-rule pattern="syncValidation"/>
         <call-method-rule pattern="filter" methodname="addFilter" paramcount="0"/>
         <call-method-rule pattern="forceAction" methodname="setForceAction" paramcount="0"/>
         <call-method-rule pattern="validationAction" methodname="setValidationAction" paramcount="0"/>

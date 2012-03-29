@@ -6,6 +6,7 @@ import javax.swing.JInternalFrame;
 import net.codjo.agent.AgentContainerMock;
 import net.codjo.agent.UserId;
 import net.codjo.agent.test.Semaphore;
+import net.codjo.control.common.message.TransferJobRequest.Transfer;
 import net.codjo.control.gui.ControlGuiContext;
 import net.codjo.control.gui.data.QuarantineGuiData;
 import net.codjo.control.gui.util.QuarantineUtil;
@@ -379,6 +380,12 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
             allFieldsSelector.addField("user", "Tout");
             allFieldsSelector.addField("source", "Tout");
             loadFilters();
+        }
+
+
+        @Override
+        protected void initQuarantineLoad() {
+            guiContext.executeTask(new QuarantineRunnable(Transfer.QUARANTINE_TO_USER, QUARANTINE_TO_USER));
         }
 
 

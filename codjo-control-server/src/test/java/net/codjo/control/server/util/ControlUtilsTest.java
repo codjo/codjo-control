@@ -1,20 +1,38 @@
 package net.codjo.control.server.util;
-import net.codjo.control.common.ControlException;
-import net.codjo.mad.server.handler.HandlerException;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.Date;
+import net.codjo.control.common.ControlException;
+import net.codjo.control.common.i18n.InternationalizationFixture;
+import net.codjo.mad.server.handler.HandlerException;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import static java.util.Calendar.DECEMBER;
 import static java.util.Calendar.JANUARY;
 import static java.util.Calendar.MARCH;
 import static java.util.Calendar.getInstance;
-import java.util.Date;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Test;
 /**
  *
  */
 public class ControlUtilsTest {
+    private InternationalizationFixture i18nFixture = new InternationalizationFixture();
+
+
+    @Before
+    public void setUp() throws Exception {
+        i18nFixture.doSetUp();
+    }
+
+
+    @After
+    public void tearDown() throws Exception {
+        i18nFixture.doTearDown();
+    }
+
 
     @Test
     public void checkFieldNotNullOK() throws Exception {
