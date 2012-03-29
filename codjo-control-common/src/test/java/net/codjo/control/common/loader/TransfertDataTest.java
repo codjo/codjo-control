@@ -24,17 +24,20 @@ import static org.mockito.Mockito.when;
  */
 public class TransfertDataTest extends TestCase {
     private static final String Q_TO_USER =
-          "INSERT INTO USER ( QUARANTINE_ID, TOTO_COL, TiTi_COL ) "
-          + "SELECT QUARANTINE.QUARANTINE_ID, QUARANTINE.TOTO_COL, QUARANTINE.TiTi_COL "
-          + "FROM QUARANTINE WHERE QUARANTINE.ERROR_TYPE > 0";
+          "insert into USER ( QUARANTINE_ID, TOTO_COL, TiTi_COL ) "
+          + "select QUARANTINE.QUARANTINE_ID, QUARANTINE.TOTO_COL, QUARANTINE.TiTi_COL "
+          + "from QUARANTINE where QUARANTINE.ERROR_TYPE > 0";
     private static final String Q_TO_USER_DELETE =
-          "DELETE QUARANTINE FROM QUARANTINE INNER JOIN USER "
-          + "ON QUARANTINE.QUARANTINE_ID = USER.QUARANTINE_ID";
+          "delete QUARANTINE"
+          + " where QUARANTINE_ID in ("
+          + "   select USER.QUARANTINE_ID"
+          + "   from QUARANTINE INNER JOIN USER"
+          + "   on QUARANTINE.QUARANTINE_ID = USER.QUARANTINE_ID)";
     private static final String USER_TO_Q =
-          "INSERT INTO QUARANTINE ( TOTO_COL, TiTi_COL ) "
-          + "SELECT USER.TOTO_COL, USER.TiTi_COL FROM USER WHERE USER.ERROR_TYPE <= 0";
+          "insert into QUARANTINE ( TOTO_COL, TiTi_COL ) "
+          + "select USER.TOTO_COL, USER.TiTi_COL from USER where USER.ERROR_TYPE <= 0";
     private static final String USER_TO_Q_DELETE =
-          "DELETE USER WHERE ERROR_TYPE <= 0";
+          "delete USER where ERROR_TYPE <= 0";
     private TransfertData transfert;
     private MockControl metaDataControl;
     private DatabaseMetaData metaDataMock;

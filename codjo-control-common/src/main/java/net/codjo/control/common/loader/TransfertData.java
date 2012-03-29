@@ -131,25 +131,25 @@ public class TransfertData {
                                   " +'µ²'+ ") + " where " + quarantine + "." + ERROR_TYPE + " > 0 ");
         }
 
-        q2user.add("INSERT INTO " + user + " " + "( " + toString(quarantineList) + " ) "
-                   + "SELECT " + toString(quarantineList, quarantine + ".")
-                   + " FROM " + quarantine
-                   + " WHERE " + quarantine + "." + ERROR_TYPE + " > 0");
-        q2user.add("DELETE " + quarantine
-                   + " FROM " + quarantine
-                   + " INNER JOIN " + user
-                   + " ON " + quarantine + ".QUARANTINE_ID = " + user + ".QUARANTINE_ID");
+        q2user.add("insert into " + user + " " + "( " + toString(quarantineList) + " ) "
+                   + "select " + toString(quarantineList, quarantine + ".")
+                   + " from " + quarantine
+                   + " where " + quarantine + "." + ERROR_TYPE + " > 0");
+        q2user.add("delete " + quarantine
+                   + " where QUARANTINE_ID in ("
+                   + "   select " + user + ".QUARANTINE_ID"
+                   + "   from " + quarantine + " INNER JOIN " + user
+                   + "   on " + quarantine + ".QUARANTINE_ID = " + user + ".QUARANTINE_ID)");
 
-        quarantineList.remove(QUARANTINE_ID);
         quarantineList.remove(QUARANTINE_ID);
 
         user2q = new ArrayList<String>();
-        user2q.add("INSERT INTO " + quarantine + " " + "( " + toString(quarantineList) + " ) "
-                   + "SELECT " + toString(quarantineList, user + ".")
-                   + " FROM " + user
-                   + " WHERE " + user + "." + ERROR_TYPE + " <= 0");
-        user2q.add("DELETE " + user
-                   + " WHERE " + ERROR_TYPE + " <= 0");
+        user2q.add("insert into " + quarantine + " " + "( " + toString(quarantineList) + " ) "
+                   + "select " + toString(quarantineList, user + ".")
+                   + " from " + user
+                   + " where " + user + "." + ERROR_TYPE + " <= 0");
+        user2q.add("delete " + user
+                   + " where " + ERROR_TYPE + " <= 0");
     }
 
 
