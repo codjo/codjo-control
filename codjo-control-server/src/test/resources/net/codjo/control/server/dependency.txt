@@ -28,6 +28,7 @@ net.codjo.control.server.plugin
 	-> net.codjo.plugin.common
 	-> net.codjo.plugin.server
 	-> net.codjo.sql.server
+	-> net.codjo.sql.server.util
 	-> net.codjo.workflow.common.message
 	-> net.codjo.workflow.common.organiser
 	-> net.codjo.workflow.common.protocol

@@ -6,11 +6,18 @@
 package net.codjo.control.common.loader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import junit.framework.TestCase;
 import org.easymock.MockControl;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *
@@ -19,117 +26,131 @@ public class TransfertDataTest extends TestCase {
     private static final String Q_TO_USER =
           "INSERT INTO USER ( QUARANTINE_ID, TOTO_COL, TiTi_COL ) "
           + "SELECT QUARANTINE.QUARANTINE_ID, QUARANTINE.TOTO_COL, QUARANTINE.TiTi_COL "
-          + "FROM QUARANTINE WHERE QUARANTINE.ERROR_TYPE > 0 "
-          + "DELETE QUARANTINE FROM QUARANTINE INNER JOIN USER "
+          + "FROM QUARANTINE WHERE QUARANTINE.ERROR_TYPE > 0";
+    private static final String Q_TO_USER_DELETE =
+          "DELETE QUARANTINE FROM QUARANTINE INNER JOIN USER "
           + "ON QUARANTINE.QUARANTINE_ID = USER.QUARANTINE_ID";
     private static final String USER_TO_Q =
           "INSERT INTO QUARANTINE ( TOTO_COL, TiTi_COL ) "
-          + "SELECT USER.TOTO_COL, USER.TiTi_COL FROM USER WHERE USER.ERROR_TYPE <= 0 "
-          + "DELETE USER WHERE ERROR_TYPE <= 0";
+          + "SELECT USER.TOTO_COL, USER.TiTi_COL FROM USER WHERE USER.ERROR_TYPE <= 0";
+    private static final String USER_TO_Q_DELETE =
+          "DELETE USER WHERE ERROR_TYPE <= 0";
     private TransfertData transfert;
-    private MockControl connectionControl;
-    private Connection connectionMock;
     private MockControl metaDataControl;
     private DatabaseMetaData metaDataMock;
     private MockControl rsControl;
     private ResultSet rsMock;
+    private Connection connection;
+    private PreparedStatement statement;
 
 
-    public void test_buildQuery_replaceUserData_singleColumn()
-          throws Exception {
-        mockMetadataCall();
-
+    public void test_buildQuery_replaceUserData_singleColumn() throws Exception {
         transfert = new TransfertData("QUARANTINE", "USER");
         transfert.addMatchingCol("TOTO_COL");
         transfert.setReplaceUserData(true);
 
         // QUARANTINE TO USER
-        String q2user = transfert.getQuarantineToUserQuery(connectionMock);
-        assertEquals("delete USER from USER inner join QUARANTINE"
-                     + " on convert(varchar,USER.TOTO_COL) = convert(varchar,QUARANTINE.TOTO_COL)"
-                     + " where QUARANTINE.ERROR_TYPE > 0 " + Q_TO_USER, q2user);
-        assertEquals("2 appels declenche le m瘱e resultat :) Et sans de nouvelle requete Meta",
-                     q2user, transfert.getQuarantineToUserQuery(connectionMock));
+        transfert.getQuarantineToUserQuery(connection).execute();
+
+        verify(connection, times(1)).getMetaData();
+        verify(connection).prepareStatement("delete USER from USER inner join QUARANTINE"
+                                            + " on convert(varchar,USER.TOTO_COL) = convert(varchar,QUARANTINE.TOTO_COL)"
+                                            + " where QUARANTINE.ERROR_TYPE > 0 ");
+        verify(connection).prepareStatement(Q_TO_USER);
+        verify(connection).prepareStatement(Q_TO_USER_DELETE);
+        verify(statement, times(3)).execute();
+        verifyMockCalls();
+
+        // QUARANTINE TO USER - Mecanisme de cache
+        setupNewMockedConnection();
+
+        transfert.getQuarantineToUserQuery(connection).execute();
+
+        verify(connection, times(0)).getMetaData();
+        verify(connection).prepareStatement("delete USER from USER inner join QUARANTINE"
+                                            + " on convert(varchar,USER.TOTO_COL) = convert(varchar,QUARANTINE.TOTO_COL)"
+                                            + " where QUARANTINE.ERROR_TYPE > 0 ");
+        verify(connection).prepareStatement(Q_TO_USER);
+        verify(connection).prepareStatement(Q_TO_USER_DELETE);
+        verify(statement, times(3)).execute();
 
         // USER TO QUARANTINE
-        String user2q = transfert.getUserToQuarantineQuery(connectionMock);
-        assertEquals(USER_TO_Q, user2q);
-        assertEquals("2 appels declenche le m瘱e resultat :) Et sans de nouvelle requete Meta",
-                     user2q, transfert.getUserToQuarantineQuery(connectionMock));
+        setupNewMockedConnection();
 
-        // Mock stuff
-        verifyMetadataCall();
+        transfert.getUserToQuarantineQuery(connection).execute();
+
+        verify(connection, times(0)).getMetaData();
+        verify(connection).prepareStatement(USER_TO_Q);
+        verify(connection).prepareStatement(USER_TO_Q_DELETE);
+        verify(statement, times(2)).execute();
     }
 
 
-    public void test_buildQuery_replaceUserData()
-          throws Exception {
-        mockMetadataCall();
-
+    public void test_buildQuery_replaceUserData() throws Exception {
         transfert = new TransfertData("QUARANTINE", "USER");
         transfert.addMatchingCol("TOTO_COL");
         transfert.addMatchingCol("TiTi_COL");
         transfert.setReplaceUserData(true);
+
         assertTrue(transfert.isReplaceUserData());
         assertEquals("[TOTO_COL, TiTi_COL]", transfert.getMatchingCols().toString());
         assertUnmodifiableList(transfert.getMatchingCols());
 
         // QUARANTINE TO USER
-        String q2user = transfert.getQuarantineToUserQuery(connectionMock);
-        assertEquals("delete USER from USER inner join QUARANTINE"
-                     + " on convert(varchar,USER.TOTO_COL) +'結'+ convert(varchar,USER.TiTi_COL) = "
-                     + "convert(varchar,QUARANTINE.TOTO_COL) +'結'+ convert(varchar,QUARANTINE.TiTi_COL)"
-                     + " where QUARANTINE.ERROR_TYPE > 0 " + Q_TO_USER, q2user);
-        assertEquals("2 appels declenche le m瘱e resultat :) Et sans de nouvelle requete Meta",
-                     q2user, transfert.getQuarantineToUserQuery(connectionMock));
+        transfert.getQuarantineToUserQuery(connection).execute();
+
+        verify(connection, times(1)).getMetaData();
+        verify(connection).prepareStatement("delete USER from USER inner join QUARANTINE"
+                                            + " on convert(varchar,USER.TOTO_COL) +'結'+ convert(varchar,USER.TiTi_COL) = "
+                                            + "convert(varchar,QUARANTINE.TOTO_COL) +'結'+ convert(varchar,QUARANTINE.TiTi_COL)"
+                                            + " where QUARANTINE.ERROR_TYPE > 0 ");
+        verify(connection).prepareStatement(Q_TO_USER);
+        verify(connection).prepareStatement(Q_TO_USER_DELETE);
+        verify(statement, times(3)).execute();
+        verifyMockCalls();
 
         // USER TO QUARANTINE
-        String user2q = transfert.getUserToQuarantineQuery(connectionMock);
-        assertEquals(USER_TO_Q, user2q);
-        assertEquals("2 appels declenche le m瘱e resultat :) Et sans de nouvelle requete Meta",
-                     user2q, transfert.getUserToQuarantineQuery(connectionMock));
+        setupNewMockedConnection();
 
-        // Mock stuff
-        verifyMetadataCall();
+        transfert.getUserToQuarantineQuery(connection).execute();
+
+        verify(connection, times(0)).getMetaData();
+        verify(connection).prepareStatement(USER_TO_Q);
+        verify(connection).prepareStatement(USER_TO_Q_DELETE);
+        verify(statement, times(2)).execute();
     }
 
 
     public void test_buildQuery() throws Exception {
-        mockMetadataCall();
-
         transfert = new TransfertData("QUARANTINE", "USER");
 
         // USER TO QUARANTINE
-        String user2q = transfert.getUserToQuarantineQuery(connectionMock);
-        assertEquals(USER_TO_Q, user2q);
-        assertEquals("2 appels declenche le m瘱e resultat :) Et sans de nouvelle requete Meta",
-                     user2q, transfert.getUserToQuarantineQuery(connectionMock));
+        transfert.getUserToQuarantineQuery(connection).execute();
+        verify(connection, times(1)).getMetaData();
+        verify(connection).prepareStatement(USER_TO_Q);
+        verify(connection).prepareStatement(USER_TO_Q_DELETE);
+        verify(statement, times(2)).execute();
+        verifyMockCalls();
 
         // QUARANTINE TO USER
-        String q2user = transfert.getQuarantineToUserQuery(connectionMock);
-        assertEquals(Q_TO_USER, q2user);
-        assertEquals("2 appels declenche le m瘱e resultat :) Et sans de nouvelle requete Meta",
-                     q2user, transfert.getQuarantineToUserQuery(connectionMock));
+        setupNewMockedConnection();
 
-        // Mock stuff
-        verifyMetadataCall();
+        transfert.getQuarantineToUserQuery(connection).execute();
+        verify(connection, times(0)).getMetaData();
+        verify(connection).prepareStatement(Q_TO_USER);
+        verify(connection).prepareStatement(Q_TO_USER_DELETE);
+        verify(statement, times(2)).execute();
     }
 
 
-    private void verifyMetadataCall() {
+    private void verifyMockCalls() {
         // Check Mock
-        connectionControl.verify();
         metaDataControl.verify();
         rsControl.verify();
     }
 
 
     private void mockMetadataCall() throws SQLException {
-        // Mock : con.getMetaData(); + close();
-        connectionMock.getMetaData();
-        connectionControl.setReturnValue(metaDataMock, 1);
-        connectionControl.replay();
-
         // Mock : md.getColumns(null, null, "QUARANTINE", null);
         metaDataMock.getColumns(null, null, "QUARANTINE", null);
         metaDataControl.setReturnValue(rsMock, 1);
@@ -176,13 +197,21 @@ public class TransfertDataTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        connectionControl = MockControl.createControl(Connection.class);
-        connectionMock = (Connection)connectionControl.getMock();
-
         metaDataControl = MockControl.createControl(DatabaseMetaData.class);
         metaDataMock = (DatabaseMetaData)metaDataControl.getMock();
 
         rsControl = MockControl.createControl(ResultSet.class);
         rsMock = (ResultSet)rsControl.getMock();
+
+        mockMetadataCall();
+        setupNewMockedConnection();
+    }
+
+
+    private void setupNewMockedConnection() throws SQLException {
+        connection = mock(Connection.class);
+        statement = mock(PreparedStatement.class);
+        when(connection.prepareStatement(anyString())).thenReturn(statement);
+        when(connection.getMetaData()).thenReturn(metaDataMock);
     }
 }

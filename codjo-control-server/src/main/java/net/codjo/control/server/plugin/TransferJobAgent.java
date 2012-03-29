@@ -1,4 +1,5 @@
 package net.codjo.control.server.plugin;
+import java.sql.Connection;
 import net.codjo.agent.DFService;
 import net.codjo.control.common.loader.TransfertData;
 import net.codjo.control.common.message.TransferJobRequest;
@@ -8,8 +9,6 @@ import net.codjo.workflow.common.message.JobException;
 import net.codjo.workflow.common.message.JobRequest;
 import net.codjo.workflow.common.protocol.JobProtocolParticipant;
 import net.codjo.workflow.server.api.JobAgent;
-import java.sql.Connection;
-import java.sql.Statement;
 import org.apache.log4j.Logger;
 /**
  *
@@ -54,25 +53,21 @@ class TransferJobAgent extends JobAgent {
 
                 ConnectionPool connectionPool = jdbc.getConnectionPool(getAgent(), getRequestMessage());
                 Connection connection = connectionPool.getConnection();
-                Statement statement = null;
                 try {
-                    statement = connection.createStatement();
-                    String query;
                     if (TransferJobRequest.Transfer.QUARANTINE_TO_USER == request.getTransferType()) {
-                        query = data.getQuarantineToUserQuery(connection);
+                        data.getQuarantineToUserQuery(connection)
+                              .execute();
                     }
                     else if (TransferJobRequest.Transfer.USER_TO_QUARANTINE == request.getTransferType()) {
-
-                        query = data.getUserToQuarantineQuery(connection);
+                        data.getUserToQuarantineQuery(connection)
+                              .execute();
                     }
                     else {
                         throw new JobException("Type de transfert inconnu.");
                     }
-
-                    statement.executeUpdate(query);
                 }
                 finally {
-                    connectionPool.releaseConnection(connection, statement);
+                    connectionPool.releaseConnection(connection);
                 }
             }
             catch (Throwable cause) {

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.codjo.sql.server.util.SqlTransactionalExecutor;
 /**
  * Objet responsable du transfert des donn嶪s de la table de quarantaine vers la table utilisateur.
  */
@@ -19,8 +20,8 @@ public class TransfertData {
     private static final String ERROR_TYPE = "ERROR_TYPE";
     private String quarantine;
     private String user;
-    private String q2user = null;
-    private String user2q = null;
+    private List<String> q2user = null;
+    private List<String> user2q = null;
     private List<String> matchingCols = new ArrayList<String>();
     private boolean replaceUserData = false;
 
@@ -75,26 +76,33 @@ public class TransfertData {
     }
 
 
-    public String getUserToQuarantineQuery(Connection connection)
-          throws SQLException {
+    public SqlTransactionalExecutor getUserToQuarantineQuery(Connection connection) throws SQLException {
         if (user2q == null) {
             buildQueries(connection);
         }
-        return user2q;
+        return createExecutorFrom(connection, user2q);
     }
 
 
-    public String getQuarantineToUserQuery(Connection con)
-          throws SQLException {
+    public SqlTransactionalExecutor getQuarantineToUserQuery(Connection connection) throws SQLException {
         if (q2user == null) {
-            buildQueries(con);
+            buildQueries(connection);
         }
-        return q2user;
+        return createExecutorFrom(connection, q2user);
     }
 
 
-    private List<String> determineDbFieldList(Connection con, String dbTableName)
-          throws SQLException {
+    private SqlTransactionalExecutor createExecutorFrom(Connection connection,
+                                                        List<String> queryList) throws SQLException {
+        SqlTransactionalExecutor executor = SqlTransactionalExecutor.init(connection);
+        for (String query : queryList) {
+            executor.prepare(query);
+        }
+        return executor;
+    }
+
+
+    private List<String> determineDbFieldList(Connection con, String dbTableName) throws SQLException {
         List<String> fields = new ArrayList<String>();
         DatabaseMetaData md = con.getMetaData();
         ResultSet rs = md.getColumns(null, null, dbTableName, null);
@@ -108,39 +116,45 @@ public class TransfertData {
 
 
     private void buildQueries(Connection con) throws SQLException {
+        q2user = new ArrayList<String>();
+
         List<String> quarantineList = determineDbFieldList(con, quarantine);
 
-        q2user =
-              "INSERT INTO " + user + " " + "( " + toString(quarantineList) + " ) " + "SELECT "
-              + toString(quarantineList, quarantine + ".") + " " + "FROM " + quarantine
-              + " " + "WHERE " + quarantine + "." + ERROR_TYPE + " > 0" + " " + "DELETE "
-              + quarantine + " " + "FROM " + quarantine + " " + "INNER JOIN " + user + " "
-              + "ON " + quarantine + ".QUARANTINE_ID = " + user + ".QUARANTINE_ID";
-
         if (replaceUserData) {
-            q2user =
-                  "delete " + user + " from " + user + " inner join " + quarantine + " on "
-                  + toString(matchingCols, "convert(varchar," + user + ".", ")", " +'結'+ ")
-                  + " = "
-                  + toString(matchingCols, "convert(varchar," + quarantine + ".", ")",
-                             " +'結'+ ") + " where " + quarantine + "." + ERROR_TYPE + " > 0 "
-                                         + q2user;
+            q2user.add("delete " + user
+                       + " from " + user
+                       + " inner join " + quarantine
+                       + " on "
+                       + toString(matchingCols, "convert(varchar," + user + ".", ")", " +'結'+ ")
+                       + " = "
+                       + toString(matchingCols, "convert(varchar," + quarantine + ".", ")",
+                                  " +'結'+ ") + " where " + quarantine + "." + ERROR_TYPE + " > 0 ");
         }
 
+        q2user.add("INSERT INTO " + user + " " + "( " + toString(quarantineList) + " ) "
+                   + "SELECT " + toString(quarantineList, quarantine + ".")
+                   + " FROM " + quarantine
+                   + " WHERE " + quarantine + "." + ERROR_TYPE + " > 0");
+        q2user.add("DELETE " + quarantine
+                   + " FROM " + quarantine
+                   + " INNER JOIN " + user
+                   + " ON " + quarantine + ".QUARANTINE_ID = " + user + ".QUARANTINE_ID");
+
         quarantineList.remove(QUARANTINE_ID);
         quarantineList.remove(QUARANTINE_ID);
 
-        user2q =
-              "INSERT INTO " + quarantine + " " + "( " + toString(quarantineList) + " ) "
-              + "SELECT " + toString(quarantineList, user + ".") + " " + "FROM " + user + " "
-              + "WHERE " + user + "." + ERROR_TYPE + " <= 0" + " " + "DELETE " + user + " "
-              + "WHERE " + ERROR_TYPE + " <= 0";
+        user2q = new ArrayList<String>();
+        user2q.add("INSERT INTO " + quarantine + " " + "( " + toString(quarantineList) + " ) "
+                   + "SELECT " + toString(quarantineList, user + ".")
+                   + " FROM " + user
+                   + " WHERE " + user + "." + ERROR_TYPE + " <= 0");
+        user2q.add("DELETE " + user
+                   + " WHERE " + ERROR_TYPE + " <= 0");
     }
 
 
-    private String toString(List fields, String fieldPrefix, String fieldPostfix,
-                            String fieldSeparator) {
-        StringBuffer buffer = new StringBuffer();
+    private String toString(List fields, String fieldPrefix, String fieldPostfix, String fieldSeparator) {
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < fields.size(); i++) {
             buffer.append(fieldPrefix).append(fields.get(i)).append(fieldPostfix);
             if ((i + 1) < fields.size()) {
