@@ -121,6 +121,7 @@ public class TransfertData {
         List<String> quarantineList = determineDbFieldList(con, quarantine);
 
         if (replaceUserData) {
+            // TODO : Attention requete encore specifique Sybase, ne pas activer replaceUserData en Oracle 
             q2user.add("delete " + user
                        + " from " + user
                        + " inner join " + quarantine
