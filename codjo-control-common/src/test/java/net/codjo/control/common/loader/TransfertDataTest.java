@@ -5,15 +5,17 @@
  */
 package net.codjo.control.common.loader;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import junit.framework.TestCase;
-import org.easymock.MockControl;
 
+import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -39,12 +41,9 @@ public class TransfertDataTest extends TestCase {
     private static final String USER_TO_Q_DELETE =
           "delete USER where ERROR_TYPE <= 0";
     private TransfertData transfert;
-    private MockControl metaDataControl;
-    private DatabaseMetaData metaDataMock;
-    private MockControl rsControl;
-    private ResultSet rsMock;
     private Connection connection;
     private PreparedStatement statement;
+    ResultSet resultSet4Metadata;
 
 
     public void test_buildQuery_replaceUserData_singleColumn() throws Exception {
@@ -55,14 +54,13 @@ public class TransfertDataTest extends TestCase {
         // QUARANTINE TO USER
         transfert.getQuarantineToUserQuery(connection).execute();
 
-        verify(connection, times(1)).getMetaData();
+        verify(resultSet4Metadata, times(1)).getMetaData();
         verify(connection).prepareStatement("delete USER from USER inner join QUARANTINE"
                                             + " on convert(varchar,USER.TOTO_COL) = convert(varchar,QUARANTINE.TOTO_COL)"
                                             + " where QUARANTINE.ERROR_TYPE > 0 ");
         verify(connection).prepareStatement(Q_TO_USER);
         verify(connection).prepareStatement(Q_TO_USER_DELETE);
         verify(statement, times(3)).execute();
-        verifyMockCalls();
 
         // QUARANTINE TO USER - Mecanisme de cache
         setupNewMockedConnection();
@@ -102,7 +100,7 @@ public class TransfertDataTest extends TestCase {
         // QUARANTINE TO USER
         transfert.getQuarantineToUserQuery(connection).execute();
 
-        verify(connection, times(1)).getMetaData();
+        verify(resultSet4Metadata, times(1)).getMetaData();
         verify(connection).prepareStatement("delete USER from USER inner join QUARANTINE"
                                             + " on convert(varchar,USER.TOTO_COL) +'µ²'+ convert(varchar,USER.TiTi_COL) = "
                                             + "convert(varchar,QUARANTINE.TOTO_COL) +'µ²'+ convert(varchar,QUARANTINE.TiTi_COL)"
@@ -110,7 +108,6 @@ public class TransfertDataTest extends TestCase {
         verify(connection).prepareStatement(Q_TO_USER);
         verify(connection).prepareStatement(Q_TO_USER_DELETE);
         verify(statement, times(3)).execute();
-        verifyMockCalls();
 
         // USER TO QUARANTINE
         setupNewMockedConnection();
@@ -129,11 +126,10 @@ public class TransfertDataTest extends TestCase {
 
         // USER TO QUARANTINE
         transfert.getUserToQuarantineQuery(connection).execute();
-        verify(connection, times(1)).getMetaData();
+        verify(resultSet4Metadata, times(1)).getMetaData();
         verify(connection).prepareStatement(USER_TO_Q);
         verify(connection).prepareStatement(USER_TO_Q_DELETE);
         verify(statement, times(2)).execute();
-        verifyMockCalls();
 
         // QUARANTINE TO USER
         setupNewMockedConnection();
@@ -143,46 +139,6 @@ public class TransfertDataTest extends TestCase {
         verify(connection).prepareStatement(Q_TO_USER);
         verify(connection).prepareStatement(Q_TO_USER_DELETE);
         verify(statement, times(2)).execute();
-    }
-
-
-    private void verifyMockCalls() {
-        // Check Mock
-        metaDataControl.verify();
-        rsControl.verify();
-    }
-
-
-    private void mockMetadataCall() throws SQLException {
-        // Mock : md.getColumns(null, null, "QUARANTINE", null);
-        metaDataMock.getColumns(null, null, "QUARANTINE", null);
-        metaDataControl.setReturnValue(rsMock, 1);
-        // Mock : La recuperation des Cols de "QUARANTINE" (rs.getString(4))
-        mockColumns();
-
-        // Activate control
-        metaDataControl.replay();
-        rsControl.replay();
-    }
-
-
-    private void mockColumns() throws SQLException {
-        rsMock.next();
-        rsControl.setReturnValue(true, 1);
-        rsMock.getString(4);
-        rsControl.setReturnValue("QUARANTINE_ID", 1);
-        rsMock.next();
-        rsControl.setReturnValue(true, 1);
-        rsMock.getString(4);
-        rsControl.setReturnValue("TOTO_COL", 1);
-        rsMock.next();
-        rsControl.setReturnValue(true, 1);
-        rsMock.getString(4);
-        rsControl.setReturnValue("TiTi_COL", 1);
-        rsMock.next();
-        rsControl.setReturnValue(false, 1);
-        rsMock.close();
-        rsControl.setVoidCallable(1);
     }
 
 
@@ -200,14 +156,8 @@ public class TransfertDataTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        metaDataControl = MockControl.createControl(DatabaseMetaData.class);
-        metaDataMock = (DatabaseMetaData)metaDataControl.getMock();
-
-        rsControl = MockControl.createControl(ResultSet.class);
-        rsMock = (ResultSet)rsControl.getMock();
-
-        mockMetadataCall();
         setupNewMockedConnection();
+        mockMetadataStuff();
     }
 
 
@@ -215,6 +165,25 @@ public class TransfertDataTest extends TestCase {
         connection = mock(Connection.class);
         statement = mock(PreparedStatement.class);
         when(connection.prepareStatement(anyString())).thenReturn(statement);
-        when(connection.getMetaData()).thenReturn(metaDataMock);
+    }
+
+
+    private void mockMetadataStuff() throws SQLException {
+        Statement statement4Metadadta = mock(Statement.class);
+        resultSet4Metadata = mock(ResultSet.class);
+        ResultSetMetaData resultSetMetadata = mock(ResultSetMetaData.class);
+
+        when(connection.createStatement()).thenReturn(statement4Metadadta);
+
+        String metadataQuery = "select * from QUARANTINE where 1 = 0";
+        when(statement4Metadadta.executeQuery(metadataQuery)).thenReturn(resultSet4Metadata);
+        when(statement4Metadadta.executeQuery(not(eq(metadataQuery))))
+              .thenThrow(new SQLException("Unexpected query has been detected -> != " + metadataQuery));
+
+        when(resultSet4Metadata.getMetaData()).thenReturn(resultSetMetadata);
+        when(resultSetMetadata.getColumnCount()).thenReturn(3);
+        when(resultSetMetadata.getColumnLabel(1)).thenReturn("QUARANTINE_ID");
+        when(resultSetMetadata.getColumnLabel(2)).thenReturn("TOTO_COL");
+        when(resultSetMetadata.getColumnLabel(3)).thenReturn("TiTi_COL");
     }
 }

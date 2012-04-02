@@ -5,9 +5,10 @@
  */
 package net.codjo.control.common.loader;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -104,12 +105,19 @@ public class TransfertData {
 
     private List<String> determineDbFieldList(Connection con, String dbTableName) throws SQLException {
         List<String> fields = new ArrayList<String>();
-        DatabaseMetaData md = con.getMetaData();
-        ResultSet rs = md.getColumns(null, null, dbTableName, null);
-        while (rs.next()) {
-            fields.add(rs.getString(4));
+
+        Statement statement = con.createStatement();
+        try {
+            ResultSet rs = statement.executeQuery("select * from " + dbTableName + " where 1 = 0");
+            ResultSetMetaData rsmd = rs.getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                fields.add(rsmd.getColumnLabel(i));
+            }
+            rs.close();
         }
-        rs.close();
+        finally {
+            statement.close();
+        }
         Collections.sort(fields);
         return fields;
     }
