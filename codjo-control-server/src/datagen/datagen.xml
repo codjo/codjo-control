@@ -41,12 +41,6 @@
                 </attributes>
                 <query factory="net.codjo.control.server.handler.DbFilterSelectorFactory"/>
             </handler-sql>
-            <handler-sql id="selectAllQuarantineColumnsFromTable">
-                <attributes>
-                    <name>value</name>
-                </attributes>
-                <query factory="net.codjo.control.server.handler.DbFilterColumnSelectorFactory"/>
-            </handler-sql>
         </feature>
     </entity>
 </entities>

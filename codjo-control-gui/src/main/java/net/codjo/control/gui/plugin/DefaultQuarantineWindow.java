@@ -47,7 +47,6 @@ import net.codjo.mad.client.request.FieldsList;
 import net.codjo.mad.client.request.RequestException;
 import net.codjo.mad.client.request.Result;
 import net.codjo.mad.client.request.Row;
-import net.codjo.mad.client.request.SelectRequest;
 import net.codjo.mad.common.structure.StructureReader;
 import net.codjo.mad.common.structure.TableStructure;
 import net.codjo.mad.gui.base.GuiPlugin;
@@ -65,11 +64,13 @@ import net.codjo.mad.gui.request.RequestToolBar;
 import net.codjo.mad.gui.request.action.DeleteAction;
 import net.codjo.mad.gui.request.event.DataSourceAdapter;
 import net.codjo.mad.gui.request.event.DataSourceEvent;
+import net.codjo.mad.gui.request.factory.CommandFactory;
 import net.codjo.mad.gui.request.factory.SelectFactory;
 import net.codjo.mad.gui.structure.StructureCache;
 import net.codjo.util.string.StringUtil;
 import net.codjo.workflow.common.schedule.ScheduleLauncher;
 
+import static net.codjo.control.common.util.SqlNameCodec.decodeList;
 import static net.codjo.control.gui.i18n.InternationalizationUtil.QUARANTINE_WINDOW_TITLE;
 import static net.codjo.mad.gui.i18n.InternationalizationUtil.retrieveTranslationNotifier;
 import static net.codjo.mad.gui.i18n.InternationalizationUtil.translate;
@@ -458,22 +459,24 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             return;
         }
         try {
-            FieldsList fieldsList = new FieldsList();
-            fieldsList.addField("tableName", guiData.getQuser());
-            SelectFactory selectFactory = new SelectFactory("selectAllQuarantineColumnsFromTable");
-            selectFactory.init(fieldsList);
-            SelectRequest request = (SelectRequest)selectFactory.buildRequest(null);
-            request.setPage(1, 1000);
-            Result result = guiContext.getSender().send(request);
-            for (Object aList : result.getRows()) {
-                Row row = (Row)aList;
-                allFieldsSelector.addField(StringUtil.sqlToJavaName(row.getFieldValue("value")), TOUT);
+            CommandFactory commandFactory = new CommandFactory("selectAllQuarantineColumnsFromTable");
+            commandFactory.init(new FieldsList("tableName", guiData.getQuser()));
+
+            Result result = guiContext.getSender().send(commandFactory.buildRequest(null));
+
+            for (String column : decodeList(fromExtractedResult(result))) {
+                allFieldsSelector.addField(StringUtil.sqlToJavaName(column), TOUT);
             }
         }
         catch (RequestException exception) {
             String message = translate("DefaultQuarantineWindow.errorColumn", guiContext);
             ErrorDialog.show(this, message, exception);
         }
+    }
+
+
+    private static String fromExtractedResult(Result result) {
+        return result.getRow(0).getField(0).getValue();
     }
 
 

@@ -13,6 +13,7 @@ import net.codjo.control.common.message.ControlJobRequest;
 import net.codjo.control.common.message.TransferJobRequest;
 import net.codjo.control.server.audit.ControlStringifier;
 import net.codjo.control.server.audit.TransferStringifier;
+import net.codjo.control.server.handler.SelectAllQuarantineColumnsFromTableHandler;
 import net.codjo.i18n.common.Language;
 import net.codjo.i18n.common.TranslationManager;
 import net.codjo.i18n.common.plugin.InternationalizationPlugin;
@@ -53,6 +54,10 @@ public final class ControlServerPlugin implements ServerPlugin {
         workflowServerPlugin.getConfiguration().registerJobBuilder(new ControlJobRequestHandler());
         new ControlStringifier().install(workflowServerPlugin);
         new TransferStringifier().install(workflowServerPlugin);
+
+        if (madServerPlugin != null) {
+            madServerPlugin.getConfiguration().addHandlerCommand(SelectAllQuarantineColumnsFromTableHandler.class);
+        }
     }
 
 

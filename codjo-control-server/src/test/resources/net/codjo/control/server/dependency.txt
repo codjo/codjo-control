@@ -7,6 +7,7 @@ net.codjo.control.server.audit
 	-> net.codjo.workflow.server.plugin
 
 net.codjo.control.server.handler
+    -> net.codjo.control.common.util
 	-> net.codjo.mad.server.handler
 	-> net.codjo.mad.server.handler.sql
 	-> net.codjo.util.string

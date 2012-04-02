@@ -5,13 +5,11 @@
  */
 package net.codjo.control.common.loader;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.codjo.control.common.util.SQLUtil;
 import net.codjo.sql.server.util.SqlTransactionalExecutor;
 /**
  * Objet responsable du transfert des données de la table de quarantaine vers la table utilisateur.
@@ -103,30 +101,10 @@ public class TransfertData {
     }
 
 
-    private List<String> determineDbFieldList(Connection con, String dbTableName) throws SQLException {
-        List<String> fields = new ArrayList<String>();
-
-        Statement statement = con.createStatement();
-        try {
-            ResultSet rs = statement.executeQuery("select * from " + dbTableName + " where 1 = 0");
-            ResultSetMetaData rsmd = rs.getMetaData();
-            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                fields.add(rsmd.getColumnLabel(i));
-            }
-            rs.close();
-        }
-        finally {
-            statement.close();
-        }
-        Collections.sort(fields);
-        return fields;
-    }
-
-
     private void buildQueries(Connection con) throws SQLException {
         q2user = new ArrayList<String>();
 
-        List<String> quarantineList = determineDbFieldList(con, quarantine);
+        List<String> quarantineList = SQLUtil.determineDbFieldList(con, quarantine);
 
         if (replaceUserData) {
             // TODO : Attention requete encore specifique Sybase, ne pas activer replaceUserData en Oracle 
