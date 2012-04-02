@@ -37,6 +37,7 @@ public class ControlServerPluginTest {
                                          new InternationalizationPlugin(),
                                          new MadServerPluginMock(new LogString("madServerPlugin", log)),
                                          new ServerCoreMock(new LogString("core", log), fixture));
+        log.assertAndClear("madServerPluginConfiguration.addHandlerCommand(SelectAllQuarantineColumnsFromTableHandler)");
 
         verify(pluginConfigurationMock).registerJobBuilder(Mockito.<JobBuilder>anyObject());
     }

@@ -24,6 +24,7 @@ net.codjo.control.server.plugin
 	-> net.codjo.control.common.message
 	-> net.codjo.control.server.api
 	-> net.codjo.control.server.audit
+	-> net.codjo.control.server.handler
 	-> net.codjo.imports.common.message
 	-> net.codjo.mad.server.plugin
 	-> net.codjo.plugin.common
