@@ -11,8 +11,10 @@ net.codjo.control.server.handler
 	-> net.codjo.control.common.util
 	-> net.codjo.database.common.api
 	-> net.codjo.database.common.api.structure
+	-> net.codjo.datagen
 	-> net.codjo.mad.server.handler
 	-> net.codjo.test.common.matcher
+	-> net.codjo.util.file
 
 net.codjo.control.server.plugin
 	-> net.codjo.i18n.common.plugin
