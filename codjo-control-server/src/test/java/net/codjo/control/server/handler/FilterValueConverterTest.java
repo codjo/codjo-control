@@ -78,6 +78,6 @@ public class FilterValueConverterTest {
     @Test
     public void test_convertTimestamp_AllCase() throws Exception {
         assertThat(FilterValueConverter.convertFromStringValue(Timestamp.class, FilterConstants.ALL),
-                   is(Timestamp.valueOf("9999-12-31 23:59:59")));
+                   is(Timestamp.valueOf("9999-12-31 00:00:00")));
     }
 }

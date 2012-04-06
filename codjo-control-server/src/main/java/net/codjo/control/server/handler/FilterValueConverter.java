@@ -20,7 +20,7 @@ public class FilterValueConverter {
             value = "9999-12-31";
         }
         if (propertyClass == Timestamp.class && FilterConstants.ALL.equals(value)) {
-            value = "9999-12-31 23:59:59";
+            value = "9999-12-31 00:00:00";
         }
         return XMLUtils.convertFromStringValue(propertyClass, value);
     }
