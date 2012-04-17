@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="http://datagen.xsd">
+    <entity name="com.mycompany.QBook" table="Q_AP_BOOK" type="quarantine">
+        <description>Book quarantine</description>
+
+        <feature>
+            <user-quarantine name="com.mycompany.QUserBook" table="Q_AP_USER_BOOK"/>
+        </feature>
+
+        <primary-key>
+            <field name="quarantineId"/>
+        </primary-key>
+
+        <properties>
+            <!-- TECHNICAL FIELDs -->
+            <field name="quarantineId" type="big-decimal">
+                <description>Quarantine Id</description>
+                <sql identity="true" precision="23" required="true" type="numeric"/>
+            </field>
+            <!-- Quarantine FIELDs -->
+            <field name="title" type="string">
+                <description>title</description>
+                <sql type="varchar" precision="255"/>
+            </field>
+        </properties>
+    </entity>
+
+</entities>

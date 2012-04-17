@@ -5,10 +5,14 @@
  */
 package net.codjo.control.common.util;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +23,7 @@ import java.util.Map;
  * @version $Revision: 1.4 $
  */
 public final class SQLUtil {
+    @SuppressWarnings({"ConstantNamingConvention"})
     private static final Map<Class, Integer> classToSql = new java.util.HashMap<Class, Integer>();
 
 
@@ -32,8 +37,8 @@ public final class SQLUtil {
 
 
     /**
-     * Construit la requete d'insertion des champs defini dans <code>columns </code>. La requete construite
-     * peut etre utilise pour un <code>PreparedStatement</code>
+     * Construit la requete d'insertion des champs defini dans <code>columns </code>. La requete construite peut etre
+     * utilise pour un <code>PreparedStatement</code>
      *
      * @param dbTableName Le nom physique de la table
      * @param columns     Les colonnes a inserer
@@ -47,9 +52,9 @@ public final class SQLUtil {
 
 
     /**
-     * Construit la requete d'update des champs defini dans <code>columns</code> . La ligne a mettre a jour
-     * est defini par la liste <code>whereList</code> . La requete construite peut etre utilise pour un
-     * <code>PreparedStatement </code>
+     * Construit la requete d'update des champs defini dans <code>columns</code> . La ligne a mettre a jour est defini
+     * par la liste <code>whereList</code> . La requete construite peut etre utilise pour un <code>PreparedStatement
+     * </code>
      *
      * @param dbTableName Le nom physique de la table
      * @param columns     Les colonnes a inserer
@@ -150,9 +155,9 @@ public final class SQLUtil {
      * @return La liste. La liste est de la forme : "COL1, COL2..."
      */
     private static String buildDBFieldNameList(Collection columns) {
-        StringBuffer nameList = new StringBuffer();
+        StringBuilder nameList = new StringBuilder();
 
-        for (Iterator iter = columns.iterator(); iter.hasNext();) {
+        for (Iterator iter = columns.iterator(); iter.hasNext(); ) {
             nameList.append((String)iter.next());
             if (iter.hasNext()) {
                 nameList.append(", ");
@@ -171,8 +176,8 @@ public final class SQLUtil {
      * @return la clause : "PERIOD=? and P=?"
      */
     private static String buildClause(Collection list, String sep) {
-        StringBuffer buffer = new StringBuffer();
-        for (Iterator iter = list.iterator(); iter.hasNext();) {
+        StringBuilder buffer = new StringBuilder();
+        for (Iterator iter = list.iterator(); iter.hasNext(); ) {
             buffer.append(iter.next()).append("=?");
             if (iter.hasNext()) {
                 buffer.append(sep);
@@ -190,7 +195,7 @@ public final class SQLUtil {
      * @return le squelette, de la forme : "values (?, ?...)"
      */
     private static String buildDBFieldValuesList(int nbOfValues) {
-        StringBuffer buffer = new StringBuffer("values (");
+        StringBuilder buffer = new StringBuilder("values (");
 
         for (int i = 0; i < nbOfValues; i++) {
             buffer.append("?");
@@ -228,5 +233,25 @@ public final class SQLUtil {
         classToSql.put(java.sql.Date.class, Types.DATE);
         classToSql.put(java.sql.Time.class, Types.TIME);
         classToSql.put(java.sql.Timestamp.class, Types.TIMESTAMP);
+    }
+
+
+    public static List<String> determineDbFieldList(Connection con, String dbTableName) throws SQLException {
+        List<String> fields = new ArrayList<String>();
+
+        Statement statement = con.createStatement();
+        try {
+            ResultSet rs = statement.executeQuery("select * from " + dbTableName + " where 1 = 0");
+            ResultSetMetaData rsmd = rs.getMetaData();
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                fields.add(rsmd.getColumnLabel(i));
+            }
+            rs.close();
+        }
+        finally {
+            statement.close();
+        }
+        Collections.sort(fields);
+        return fields;
     }
 }

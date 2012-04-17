@@ -29,6 +29,7 @@ import net.codjo.agent.AgentContainer;
 import net.codjo.agent.UserId;
 import net.codjo.control.common.message.TransferJobRequest;
 import net.codjo.control.common.message.TransferJobRequest.Transfer;
+import net.codjo.control.common.util.FilterConstants;
 import net.codjo.control.gui.data.DbFilterData;
 import net.codjo.control.gui.data.QuarantineGuiData;
 import net.codjo.control.gui.data.WindowData;
@@ -47,7 +48,6 @@ import net.codjo.mad.client.request.FieldsList;
 import net.codjo.mad.client.request.RequestException;
 import net.codjo.mad.client.request.Result;
 import net.codjo.mad.client.request.Row;
-import net.codjo.mad.client.request.SelectRequest;
 import net.codjo.mad.common.structure.StructureReader;
 import net.codjo.mad.common.structure.TableStructure;
 import net.codjo.mad.gui.base.GuiPlugin;
@@ -65,11 +65,13 @@ import net.codjo.mad.gui.request.RequestToolBar;
 import net.codjo.mad.gui.request.action.DeleteAction;
 import net.codjo.mad.gui.request.event.DataSourceAdapter;
 import net.codjo.mad.gui.request.event.DataSourceEvent;
+import net.codjo.mad.gui.request.factory.CommandFactory;
 import net.codjo.mad.gui.request.factory.SelectFactory;
 import net.codjo.mad.gui.structure.StructureCache;
 import net.codjo.util.string.StringUtil;
 import net.codjo.workflow.common.schedule.ScheduleLauncher;
 
+import static net.codjo.control.common.util.SqlNameCodec.decodeList;
 import static net.codjo.control.gui.i18n.InternationalizationUtil.QUARANTINE_WINDOW_TITLE;
 import static net.codjo.mad.gui.i18n.InternationalizationUtil.retrieveTranslationNotifier;
 import static net.codjo.mad.gui.i18n.InternationalizationUtil.translate;
@@ -78,7 +80,6 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
     public static final String QUARANTINE_GUI_DATA = "QuarantineGuiData";
     protected static final String QUARANTINE_TO_USER = "DefaultQuarantineWindow.transfertUser";
     private static final String USER_TO_QUARANTINE = "DefaultQuarantineWindow.transfertQuarantine";
-    private static final String TOUT = "Tout";
 
     private QuarantineGuiData guiData;
     private final UserId userId;
@@ -379,7 +380,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             rows = new ArrayList<Row>();
         }
         Row newRow = new Row();
-        newRow.addField("value", TOUT);
+        newRow.addField("value", FilterConstants.ALL);
         rows.add(0, newRow);
         loadResult.setRows(rows);
         comboBox.getDataSource().setLoadResult(loadResult);
@@ -392,7 +393,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
                                                               int index,
                                                               boolean isSelected,
                                                               boolean cellHasFocus) {
-                    if (TOUT.equals(value)) {
+                    if (FilterConstants.ALL.equals(value)) {
                         value = translate("DefaultQuarantineWindow.filterComboBox.all", guiContext);
                     }
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -458,22 +459,24 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             return;
         }
         try {
-            FieldsList fieldsList = new FieldsList();
-            fieldsList.addField("tableName", guiData.getQuser());
-            SelectFactory selectFactory = new SelectFactory("selectAllQuarantineColumnsFromTable");
-            selectFactory.init(fieldsList);
-            SelectRequest request = (SelectRequest)selectFactory.buildRequest(null);
-            request.setPage(1, 1000);
-            Result result = guiContext.getSender().send(request);
-            for (Object aList : result.getRows()) {
-                Row row = (Row)aList;
-                allFieldsSelector.addField(StringUtil.sqlToJavaName(row.getFieldValue("value")), TOUT);
+            CommandFactory commandFactory = new CommandFactory("selectAllQuarantineColumnsFromTable");
+            commandFactory.init(new FieldsList("tableName", guiData.getQuser()));
+
+            Result result = guiContext.getSender().send(commandFactory.buildRequest(null));
+
+            for (String column : decodeList(fromExtractedResult(result))) {
+                allFieldsSelector.addField(StringUtil.sqlToJavaName(column), FilterConstants.ALL);
             }
         }
         catch (RequestException exception) {
             String message = translate("DefaultQuarantineWindow.errorColumn", guiContext);
             ErrorDialog.show(this, message, exception);
         }
+    }
+
+
+    private static String fromExtractedResult(Result result) {
+        return result.getRow(0).getField(0).getValue();
     }
 
 
@@ -518,7 +521,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             for (Iterator<String> it = allFieldsSelector.fieldNames(); it.hasNext(); ) {
                 String column = it.next();
                 if (!selector.contains(column)) {
-                    selector.addField(column, TOUT);
+                    selector.addField(column, FilterConstants.ALL);
                 }
             }
         }
@@ -572,7 +575,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
                                                       int index,
                                                       boolean isSelected,
                                                       boolean cellHasFocus) {
-            if (TOUT.equals(value)) {
+            if (FilterConstants.ALL.equals(value)) {
                 value = translate("DefaultQuarantineWindow.filterComboBox.all", guiContext);
             }
             return actualRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

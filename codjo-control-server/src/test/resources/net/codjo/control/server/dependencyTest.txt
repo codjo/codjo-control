@@ -7,6 +7,15 @@ net.codjo.control.server.api
 net.codjo.control.server.audit
     -> net.codjo.workflow.common.message
 
+net.codjo.control.server.handler
+	-> net.codjo.control.common.util
+	-> net.codjo.database.common.api
+	-> net.codjo.database.common.api.structure
+	-> net.codjo.datagen
+	-> net.codjo.mad.server.handler
+	-> net.codjo.test.common.matcher
+	-> net.codjo.util.file
+
 net.codjo.control.server.plugin
 	-> net.codjo.i18n.common.plugin
 	-> net.codjo.agent
@@ -32,7 +41,7 @@ net.codjo.control.server.plugin
 	-> net.codjo.workflow.server.organiser
 	-> net.codjo.workflow.server.plugin
 	-> org.mockito
-	-> org.mockito.internal.progress
+	-> org.mockito.stubbing
 
 net.codjo.control.server.util
     -> net.codjo.control.common.i18n
