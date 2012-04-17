@@ -41,7 +41,7 @@ net.codjo.control.server.plugin
 	-> net.codjo.workflow.server.organiser
 	-> net.codjo.workflow.server.plugin
 	-> org.mockito
-	-> org.mockito.internal.progress
+	-> org.mockito.stubbing
 
 net.codjo.control.server.util
     -> net.codjo.control.common.i18n
