@@ -7,6 +7,7 @@ net.codjo.control.server.audit
 	-> net.codjo.workflow.server.plugin
 
 net.codjo.control.server.handler
+    -> net.codjo.control.common.util
 	-> net.codjo.mad.server.handler
 	-> net.codjo.mad.server.handler.sql
 	-> net.codjo.util.string
@@ -23,11 +24,13 @@ net.codjo.control.server.plugin
 	-> net.codjo.control.common.message
 	-> net.codjo.control.server.api
 	-> net.codjo.control.server.audit
+	-> net.codjo.control.server.handler
 	-> net.codjo.imports.common.message
 	-> net.codjo.mad.server.plugin
 	-> net.codjo.plugin.common
 	-> net.codjo.plugin.server
 	-> net.codjo.sql.server
+	-> net.codjo.sql.server.util
 	-> net.codjo.workflow.common.message
 	-> net.codjo.workflow.common.organiser
 	-> net.codjo.workflow.common.protocol
