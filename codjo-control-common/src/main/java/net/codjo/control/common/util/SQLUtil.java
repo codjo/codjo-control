@@ -13,9 +13,12 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import org.apache.log4j.Logger;
 /**
  * Ensemble de méthode utilitaire SQL.
  *
@@ -25,6 +28,7 @@ import java.util.Map;
 public final class SQLUtil {
     @SuppressWarnings({"ConstantNamingConvention"})
     private static final Map<Class, Integer> classToSql = new java.util.HashMap<Class, Integer>();
+    private static final Logger APP = Logger.getLogger(SQLUtil.class);
 
 
     static {
@@ -237,21 +241,33 @@ public final class SQLUtil {
 
 
     public static List<String> determineDbFieldList(Connection con, String dbTableName) throws SQLException {
-        List<String> fields = new ArrayList<String>();
+        Set<String> strings = determineDbFieldDef(con, dbTableName, null).keySet();
+        List<String> fields = new ArrayList<String>(strings);
+        Collections.sort(fields);
+        return fields;
+    }
 
+
+    public static Map<String, Integer> determineDbFieldDef(Connection con, String dbTableName,
+                                                           String catalog) throws SQLException {
         Statement statement = con.createStatement();
+        Map<String, Integer> fieldDef = new HashMap<String, Integer>();
         try {
             ResultSet rs = statement.executeQuery("select * from " + dbTableName + " where 1 = 0");
             ResultSetMetaData rsmd = rs.getMetaData();
+
+            APP.debug("analyse des champs de la table " + ((catalog != null) ? catalog + "." : "") + dbTableName);
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                fields.add(rsmd.getColumnLabel(i));
+                String dbFieldName = rsmd.getColumnLabel(i);
+                int sqlType = rsmd.getColumnType(i);
+                APP.debug("  champ " + dbFieldName + " de type " + sqlType);
+                fieldDef.put(dbFieldName, sqlType);
             }
             rs.close();
         }
         finally {
             statement.close();
         }
-        Collections.sort(fields);
-        return fields;
+        return fieldDef;
     }
 }
