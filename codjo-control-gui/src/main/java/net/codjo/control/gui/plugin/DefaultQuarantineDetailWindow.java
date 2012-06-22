@@ -49,7 +49,7 @@ public class DefaultQuarantineDetailWindow extends JInternalFrame implements Int
     private ButtonPanelLogic buttonPanelLogic = new ButtonPanelLogic();
     private LabelledItemPanel currentMainPanel = null;
     private int fieldsCount = 0;
-    private JButton forceButton = new JButton("Forcer");
+    protected JButton forceButton = new JButton("Forcer");
     private List<LabelledItemPanel> mainPanelList = new ArrayList<LabelledItemPanel>();
     private JTabbedPane mainTabbedPane = new JTabbedPane();
     protected DetailDataSource dataSource;
