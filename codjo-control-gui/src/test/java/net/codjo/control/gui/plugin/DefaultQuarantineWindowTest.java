@@ -22,6 +22,7 @@ import net.codjo.mad.client.request.RequestIdManager;
 import net.codjo.mad.client.request.Result;
 import net.codjo.mad.client.request.ResultManager;
 import net.codjo.mad.client.request.Row;
+import net.codjo.mad.client.request.SelectRequest;
 import net.codjo.mad.common.structure.DefaultStructureReader;
 import net.codjo.mad.common.structure.StructureReader;
 import net.codjo.mad.gui.base.GuiPlugin;
@@ -32,6 +33,7 @@ import net.codjo.mad.gui.request.Mock;
 import net.codjo.mad.gui.request.PreferenceFactory;
 import net.codjo.mad.gui.request.RequestComboBox;
 import net.codjo.mad.gui.request.RequestTable;
+import net.codjo.mad.gui.request.factory.SelectFactory;
 import net.codjo.security.common.api.UserMock;
 import net.codjo.test.common.LogString;
 import org.uispec4j.ComboBox;
@@ -56,6 +58,7 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
           + "</preferenceList>                                                 ";
 
     private Window window;
+    private RequestComboBox issuerCodeCombo;
     private RequestComboBox userCombo;
     private RequestComboBox sourceCombo;
     private LogString log = new LogString();
@@ -176,6 +179,21 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
     }
 
 
+    public void test_dbFilters_sorting() throws Exception {
+        QuarantineGuiData guiData = (QuarantineGuiData)manager.getList().getDataList().toArray()[3];
+        window = new Window(new DefaultQuarantineWindowMockWithRealComboDataSources(guiContext, guiData, userId));
+
+        issuerCodeCombo = (RequestComboBox)window.getComboBox("DbFilter.issuerCode").getAwtComponent();
+        checkSorterInSelector("ascending", issuerCodeCombo.getDataSource());
+
+        sourceCombo = (RequestComboBox)window.getComboBox("DbFilter.source").getAwtComponent();
+        checkSorterInSelector("descending", sourceCombo.getDataSource());
+
+        userCombo = (RequestComboBox)window.getComboBox("DbFilter.user").getAwtComponent();
+        checkSorterInSelector(null, userCombo.getDataSource());
+    }
+
+
     public void test_groupingByOkButton() throws Exception {
         assertGrouping(new Trigger() {
             public void run() throws Exception {
@@ -216,6 +234,14 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
                   + "<primarykey><field name=\"field1\">ligne1</field></primarykey>"
                   + "<row><field name=\"errorType\">0</field></row>"
                   + "</update>");
+    }
+
+
+    private void checkSorterInSelector(String expected, ListDataSource dataSource) {
+        SelectFactory selectFactory = (SelectFactory)dataSource.getLoadFactory();
+        SelectRequest request = (SelectRequest)selectFactory.buildRequest(null);
+        FieldsList selector = request.getSelector();
+        assertEquals(expected, selector.getFieldValue("sorter"));
     }
 
 
@@ -307,6 +333,13 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
 
 
     private void initDataSources(Window aWindow) {
+        issuerCodeCombo = (RequestComboBox)aWindow.getComboBox("DbFilter.issuerCode").getAwtComponent();
+        ListDataSource issuerCodeDataSource = issuerCodeCombo.getDataSource();
+
+        issuerCodeDataSource.addRow(createRow("value", "code2"));
+        issuerCodeDataSource.addRow(createRow("value", "code0"));
+        issuerCodeDataSource.addRow(createRow("value", "code1"));
+
         userCombo = (RequestComboBox)aWindow.getComboBox("DbFilter.user").getAwtComponent();
         ListDataSource userDataSource = userCombo.getDataSource();
 
@@ -399,6 +432,52 @@ public class DefaultQuarantineWindowTest extends UISpecTestCase {
         @Override
         protected ListDataSource getFilterDataSource() {
             return new MockDataSource("filter combo", log);
+        }
+
+
+        @Override
+        protected StructureReader getStructureReader(GuiContext localGuiCtxt) {
+            try {
+                return new DefaultStructureReader(getClass().getResourceAsStream("StructureDef.xml"));
+            }
+            catch (Exception e) {
+                fail("Exception inattendue");
+            }
+            return null;
+        }
+    }
+
+    private class DefaultQuarantineWindowMockWithRealComboDataSources extends DefaultQuarantineWindow {
+
+        DefaultQuarantineWindowMockWithRealComboDataSources(GuiContext rootCtxt, QuarantineGuiData gui,
+                                                            UserId userId, ListDataSource listDataSource)
+              throws Exception {
+            super(rootCtxt, gui, userId, listDataSource);
+            allFieldsSelector.addField("issuerCode", "Tout");
+            allFieldsSelector.addField("user", "Tout");
+            allFieldsSelector.addField("source", "Tout");
+        }
+
+
+        DefaultQuarantineWindowMockWithRealComboDataSources(GuiContext rootCtxt, QuarantineGuiData gui, UserId userId)
+              throws Exception {
+            super(rootCtxt, gui, userId, new MockDataSource("main table", log));
+            allFieldsSelector.addField("issuerCode", "Tout");
+            allFieldsSelector.addField("user", "Tout");
+            allFieldsSelector.addField("source", "Tout");
+        }
+
+
+        @Override
+        protected void initQuarantineLoad() {
+            guiContext.executeTask(new QuarantineRunnable(Transfer.QUARANTINE_TO_USER, QUARANTINE_TO_USER));
+        }
+
+
+        @Override
+        void loadFilters() {
+            super.loadFilters();
+            log.call("filters loaded");
         }
 
 

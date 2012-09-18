@@ -295,6 +295,7 @@ class DefaultQuarantineWindow extends JInternalFrame implements Internationaliza
             FieldsList fieldList = new FieldsList();
             fieldList.addField("tableName", guiData.getQuser());
             fieldList.addField("columnName", dbFilterData.getDbFilterColumnName());
+            fieldList.addField("sorter", dbFilterData.getSorter());
             SelectFactory loadFactory = new SelectFactory("selectAllQuarantineValuesForFieldName");
             loadFactory.init(fieldList);
             ListDataSource filterDataSource = getFilterDataSource();

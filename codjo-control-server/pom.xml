@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <!-- POM's layout - http://www.javaworld.com/javaworld/jw-05-2006/jw-0529-maven.html -->
 
     <modelVersion>4.0.0</modelVersion>
@@ -67,6 +68,18 @@
         </dependency>
         <dependency>
             <groupId>net.codjo.database</groupId>
+            <artifactId>codjo-database-api</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.database</groupId>
+            <artifactId>codjo-database-${databaseType}-api</artifactId>
+            <optional>true</optional>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.database</groupId>
             <artifactId>codjo-database-${databaseType}</artifactId>
             <optional>true</optional>
             <scope>test</scope>
@@ -91,6 +104,12 @@
         <dependency>
             <groupId>net.codjo.mad</groupId>
             <artifactId>codjo-mad-server</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.codjo.security</groupId>
+            <artifactId>codjo-security-common</artifactId>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>

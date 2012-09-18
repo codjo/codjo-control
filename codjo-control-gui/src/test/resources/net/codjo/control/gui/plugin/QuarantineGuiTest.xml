@@ -40,8 +40,8 @@
         <icon>FTitres.jpg</icon>
         <window title="Liste quarantaine des emetteurs">
             <preference>QUserIssuerWindow</preference>
-            <dbFilter>issuerCode</dbFilter>
-            <dbFilter renderer="net.codjo.control.gui.plugin.ComboBoxRenderer">source</dbFilter>
+            <dbFilter sorter="ascending">issuerCode</dbFilter>
+            <dbFilter sorter="descending" renderer="net.codjo.control.gui.plugin.ComboBoxRenderer">source</dbFilter>
             <dbFilter>user</dbFilter>
         </window>
         <detail title="Detail quarantaine des emetteurs" nbFieldsByPage="5">
