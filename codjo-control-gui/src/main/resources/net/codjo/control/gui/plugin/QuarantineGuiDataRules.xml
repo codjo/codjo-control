@@ -36,6 +36,7 @@
         <object-create-rule classname="net.codjo.control.gui.data.DbFilterData"/>
         <set-properties-rule/>
         <bean-property-setter-rule pattern="renderer"/>
+        <bean-property-setter-rule pattern="sorter"/>
         <call-method-rule methodname="setDbFilterColumnName" paramcount="1"/>
         <call-param-rule paramnumber="0" type="java.lang.String"/>
         <set-next-rule methodname="addDbFilter"/>

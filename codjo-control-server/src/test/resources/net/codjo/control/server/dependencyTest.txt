@@ -13,6 +13,7 @@ net.codjo.control.server.handler
 	-> net.codjo.database.common.api.structure
 	-> net.codjo.datagen
 	-> net.codjo.mad.server.handler
+	-> net.codjo.mad.server.handler.sql
 	-> net.codjo.test.common.matcher
 	-> net.codjo.util.file
 
