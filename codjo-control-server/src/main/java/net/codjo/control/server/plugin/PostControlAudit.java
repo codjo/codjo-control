@@ -1,6 +1,9 @@
 package net.codjo.control.server.plugin;
+import java.text.MessageFormat;
 import net.codjo.workflow.common.message.Arguments;
 import net.codjo.workflow.common.message.JobAudit;
+
+import static net.codjo.i18n.common.plugin.InternationalizationUtil.translate;
 /**
  *
  */
@@ -58,7 +61,7 @@ public class PostControlAudit {
         jobAudit.setArguments(arguments);
 
         if (getBadLineCount() > 0) {
-            jobAudit.setWarningMessage("Il y a " + getBadLineCount() + " ligne(s) placées en quarantaine.");
+            jobAudit.setWarningMessage(MessageFormat.format(translate("PostControlAudit.message"), getBadLineCount()));
         }
     }
 }

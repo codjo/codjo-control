@@ -17,6 +17,11 @@ net.codjo.control.server.handler
 	-> net.codjo.test.common.matcher
 	-> net.codjo.util.file
 
+net.codjo.control.server.i18n
+	-> net.codjo.i18n.common
+	-> net.codjo.i18n.common.plugin
+	-> net.codjo.test.common.fixture
+
 net.codjo.control.server.plugin
 	-> net.codjo.i18n.common.plugin
 	-> net.codjo.agent
@@ -27,8 +32,10 @@ net.codjo.control.server.plugin
 	-> net.codjo.control.common.loader
 	-> net.codjo.control.common.message
 	-> net.codjo.control.server.api
+	-> net.codjo.control.server.i18n
 	-> net.codjo.database.common.api
 	-> net.codjo.database.common.api.structure
+	-> net.codjo.i18n.common
 	-> net.codjo.imports.common.message
 	-> net.codjo.mad.server.plugin
 	-> net.codjo.plugin.server
