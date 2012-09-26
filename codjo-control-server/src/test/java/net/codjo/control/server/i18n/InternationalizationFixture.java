@@ -9,6 +9,7 @@ import net.codjo.test.common.fixture.Fixture;
 public class InternationalizationFixture implements Fixture {
     private InternationalizationPlugin i18nPlugin = new InternationalizationPlugin();
 
+
     public void doSetUp() throws Exception {
         i18nPlugin = new InternationalizationPlugin();
         TranslationManager translationManager = i18nPlugin.getConfiguration().getTranslationManager();
