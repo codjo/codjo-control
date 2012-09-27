@@ -1,5 +1,6 @@
 package net.codjo.control.server.plugin;
 import java.text.MessageFormat;
+import java.util.Locale;
 import net.codjo.workflow.common.message.Arguments;
 import net.codjo.workflow.common.message.JobAudit;
 
@@ -61,7 +62,9 @@ public class PostControlAudit {
         jobAudit.setArguments(arguments);
 
         if (getBadLineCount() > 0) {
-            jobAudit.setWarningMessage(MessageFormat.format(translate("PostControlAudit.message"), getBadLineCount()));
+            MessageFormat messageFormat = new MessageFormat(translate("PostControlAudit.message"), Locale.FRENCH);
+            Object[] param = {getBadLineCount()};
+            jobAudit.setWarningMessage(messageFormat.format(param));
         }
     }
 }

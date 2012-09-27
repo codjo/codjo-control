@@ -57,13 +57,13 @@ public class PostControlAuditTest extends TestCase {
 
     public void test_warning() throws Exception {
         audit.setValidLineCount(5);
-        audit.setBadLineCount(10);
+        audit.setBadLineCount(1000);
 
         JobAudit jobAudit = new JobAudit();
         audit.fill(jobAudit);
 
         assertEquals(JobAudit.Status.WARNING, jobAudit.getStatus());
-        assertEquals("Il y a 10 ligne(s) placées en quarantaine.", jobAudit.getWarningMessage());
+        assertEquals("Il y a 1 000 ligne(s) placées en quarantaine.", jobAudit.getWarningMessage());
 
         i18nFixture.setLanguage(Language.EN);
 
@@ -71,7 +71,7 @@ public class PostControlAuditTest extends TestCase {
         audit.fill(jobAudit);
 
         assertEquals(JobAudit.Status.WARNING, jobAudit.getStatus());
-        assertEquals("There is(are) 10 line(s) in quarantine.", jobAudit.getWarningMessage());
+        assertEquals("There is(are) 1 000 line(s) in quarantine.", jobAudit.getWarningMessage());
     }
 
 
