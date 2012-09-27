@@ -1,11 +1,14 @@
 package net.codjo.control.server.plugin;
-import net.codjo.workflow.common.message.JobAudit;
 import junit.framework.TestCase;
+import net.codjo.control.server.i18n.InternationalizationFixture;
+import net.codjo.i18n.common.Language;
+import net.codjo.workflow.common.message.JobAudit;
 /**
  * Classe de test de {@link PostControlAudit}.
  */
 public class PostControlAuditTest extends TestCase {
     private PostControlAudit audit;
+    private InternationalizationFixture i18nFixture = new InternationalizationFixture();
 
 
     public void test_constructor() throws Exception {
@@ -54,13 +57,21 @@ public class PostControlAuditTest extends TestCase {
 
     public void test_warning() throws Exception {
         audit.setValidLineCount(5);
-        audit.setBadLineCount(10);
+        audit.setBadLineCount(1000);
 
         JobAudit jobAudit = new JobAudit();
         audit.fill(jobAudit);
 
         assertEquals(JobAudit.Status.WARNING, jobAudit.getStatus());
-        assertEquals("Il y a 10 ligne(s) placées en quarantaine.", jobAudit.getWarningMessage());
+        assertEquals("Il y a 1 000 ligne(s) placées en quarantaine.", jobAudit.getWarningMessage());
+
+        i18nFixture.setLanguage(Language.EN);
+
+        jobAudit = new JobAudit();
+        audit.fill(jobAudit);
+
+        assertEquals(JobAudit.Status.WARNING, jobAudit.getStatus());
+        assertEquals("There is(are) 1 000 line(s) in quarantine.", jobAudit.getWarningMessage());
     }
 
 
@@ -77,6 +88,13 @@ public class PostControlAuditTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
+        i18nFixture.doSetUp();
         audit = new PostControlAudit();
+    }
+
+
+    @Override
+    protected void tearDown() throws Exception {
+        i18nFixture.doTearDown();
     }
 }
